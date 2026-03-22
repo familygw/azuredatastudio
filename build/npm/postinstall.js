@@ -11,6 +11,9 @@ const { dirs } = require('./dirs');
 const { setupBuildYarnrc } = require('./setupBuildYarnrc');
 const yarn = process.platform === 'win32' ? 'yarn.cmd' : 'yarn';
 const root = path.dirname(path.dirname(__dirname));
+const windowsOnlyDirs = new Set([
+	'extensions/admin-tool-ext-win'
+]);
 
 function run(command, args, opts) {
 	console.log('$ ' + command + ' ' + args.join(' '));
@@ -69,6 +72,11 @@ for (let dir of dirs) {
 
 	if (dir === '') {
 		// `yarn` already executed in root
+		continue;
+	}
+
+	if (process.platform !== 'win32' && windowsOnlyDirs.has(dir)) {
+		console.log(`Skipping ${dir} on ${process.platform} because it is Windows-only.`);
 		continue;
 	}
 

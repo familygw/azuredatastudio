@@ -132,7 +132,7 @@ export class QueryManagementService implements IQueryManagementService {
 	public _queryRunners = new Map<string, QueryRunner>();
 
 	// public for testing only
-	public _handlerCallbackQueue: ((run: QueryRunner) => void)[] = [];
+	public _handlerCallbackQueue = new Map<string, ((run: QueryRunner) => void)[]>();
 
 	constructor(
 		@IConnectionManagementService private _connectionService: IConnectionManagementService,
@@ -147,12 +147,14 @@ export class QueryManagementService implements IQueryManagementService {
 	// public for testing only
 	public registerRunner(runner: QueryRunner, uri: string): void {
 		// If enqueueOrRun was called before registerRunner for the current query,
-		// _handlerCallbackQueue will be non-empty. Run all handlers in the queue first
-		// so that notifications are handled in order they arrived
-		while (this._handlerCallbackQueue.length > 0) {
-			let handler = this._handlerCallbackQueue.shift()!;
+		// run only that query's queued handlers so notifications aren't delivered
+		// to a different runner when multiple queries are active.
+		const queuedHandlers = this._handlerCallbackQueue.get(uri);
+		while (queuedHandlers?.length) {
+			const handler = queuedHandlers.shift()!;
 			handler(runner);
 		}
+		this._handlerCallbackQueue.delete(uri);
 
 		// Set the runner for any other handlers if the runner is in use by the
 		// current query or a subsequent query
@@ -172,9 +174,14 @@ export class QueryManagementService implements IQueryManagementService {
 	// Handles logic to run the given handlerCallback at the appropriate time. If the given runner is
 	// undefined, the handlerCallback is put on the _handlerCallbackQueue to be run once the runner is set
 	// public for testing only
-	private enqueueOrRun(handlerCallback: (runnerParam: QueryRunner) => void, runner?: QueryRunner): void {
+	private enqueueOrRun(ownerUri: string, handlerCallback: (runnerParam: QueryRunner) => void, runner?: QueryRunner): void {
 		if (runner === undefined) {
-			this._handlerCallbackQueue.push(handlerCallback);
+			let queuedHandlers = this._handlerCallbackQueue.get(ownerUri);
+			if (!queuedHandlers) {
+				queuedHandlers = [];
+				this._handlerCallbackQueue.set(ownerUri, queuedHandlers);
+			}
+			queuedHandlers.push(handlerCallback);
 		} else {
 			handlerCallback(runner);
 		}
@@ -182,7 +189,7 @@ export class QueryManagementService implements IQueryManagementService {
 
 	private _notify(ownerUri: string, sendNotification: (runner: QueryRunner | EditQueryRunner) => void): void {
 		let runner = this._queryRunners.get(ownerUri);
-		this.enqueueOrRun(sendNotification, runner);
+		this.enqueueOrRun(ownerUri, sendNotification, runner);
 	}
 
 	public addQueryRequestHandler(queryType: string, handler: IQueryRequestHandler): IDisposable {
@@ -330,6 +337,7 @@ export class QueryManagementService implements IQueryManagementService {
 
 	public disposeQuery(ownerUri: string): Promise<void> {
 		this._queryRunners.delete(ownerUri);
+		this._handlerCallbackQueue.delete(ownerUri);
 		return this._runAction(ownerUri, (runner) => {
 			return runner.disposeQuery(ownerUri);
 		});
@@ -345,6 +353,13 @@ export class QueryManagementService implements IQueryManagementService {
 		} else {
 			this._queryRunners.set(newUri, item);
 			this._queryRunners.delete(oldUri);
+		}
+
+		const queuedHandlers = this._handlerCallbackQueue.get(oldUri);
+		if (queuedHandlers) {
+			const existingQueuedHandlers = this._handlerCallbackQueue.get(newUri);
+			this._handlerCallbackQueue.set(newUri, existingQueuedHandlers ? [...queuedHandlers, ...existingQueuedHandlers] : queuedHandlers);
+			this._handlerCallbackQueue.delete(oldUri);
 		}
 
 		return this._runAction(newUri, (handler) => {
