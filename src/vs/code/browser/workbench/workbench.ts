@@ -94,11 +94,11 @@ class ServerKeyedAESCrypto implements ISecretStorageCrypto {
 		const cipherText = dataUint8Array.slice(keyLength + AESConstants.IV_LENGTH);
 
 		// Do the decryption and parse the result as JSON
-		const key = await this.getKey(clientKey.buffer);
+		const key = await this.getKey(new Uint8Array(clientKey.buffer));
 		const decrypted = await window.crypto.subtle.decrypt(
-			{ name: AESConstants.ALGORITHM as const, iv: iv.buffer },
+			{ name: AESConstants.ALGORITHM as const, iv: new Uint8Array(iv.buffer) },
 			key,
-			cipherText.buffer
+			new Uint8Array(cipherText.buffer)
 		);
 
 		return new TextDecoder().decode(new Uint8Array(decrypted));

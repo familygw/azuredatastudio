@@ -10,7 +10,7 @@ import { ISelection } from 'vs/editor/common/core/selection';
 import { IInlineChatSession, IInlineChatRequest, InlineChatResponseFeedbackKind, InlineChatResponseType } from 'vs/workbench/contrib/inlineChat/common/inlineChat';
 import { IRelaxedExtensionDescription } from 'vs/platform/extensions/common/extensions';
 import { ILogService } from 'vs/platform/log/common/log';
-import { ExtHostInlineChatShape, IInlineChatResponseDto, IMainContext, MainContext, MainThreadInlineChatShape } from 'vs/workbench/api/common/extHost.protocol';
+import { ExtHostInlineChatShape, IInlineChatResponseDto, IMainContext, IWorkspaceEditDto, MainContext, MainThreadInlineChatShape } from 'vs/workbench/api/common/extHost.protocol';
 import { ExtHostDocuments } from 'vs/workbench/api/common/extHostDocuments';
 import * as typeConvert from 'vs/workbench/api/common/extHostTypeConverters';
 import * as extHostTypes from 'vs/workbench/api/common/extHostTypes';
@@ -199,11 +199,11 @@ export class ExtHostInteractiveEditor implements ExtHostInlineChatShape {
 
 			const { edits } = res;
 			if (edits instanceof extHostTypes.WorkspaceEdit) {
-				return {
+				return <IInlineChatResponseDto>{
 					...stub,
 					id,
 					type: InlineChatResponseType.BulkEdit,
-					edits: typeConvert.WorkspaceEdit.from(edits),
+					edits: typeConvert.WorkspaceEdit.from(edits) as IWorkspaceEditDto,
 				};
 
 			} else if (Array.isArray(edits)) {

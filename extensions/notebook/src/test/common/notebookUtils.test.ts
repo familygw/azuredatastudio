@@ -140,7 +140,7 @@ describe('notebookUtils Tests', function (): void {
 
 	describe('clearActiveCellOutput', function () {
 		it('shows error when no notebook visible', async function (): Promise<void> {
-			sinon.replaceGetter(azdata.nb, 'activeNotebookEditor', () => undefined);
+			sinon.replaceGetter(azdata.nb, 'activeNotebookEditor', (): azdata.nb.NotebookEditor | undefined => undefined);
 			await notebookUtils.clearActiveCellOutput();
 			should(showErrorMessageSpy.calledOnce).be.true('showErrorMessage should be called exactly once');
 		});
@@ -156,7 +156,7 @@ describe('notebookUtils Tests', function (): void {
 
 	describe('runAllCells', function () {
 		it('shows error when no notebook visible', async function (): Promise<void> {
-			sinon.replaceGetter(azdata.nb, 'activeNotebookEditor', () => undefined);
+			sinon.replaceGetter(azdata.nb, 'activeNotebookEditor', (): azdata.nb.NotebookEditor | undefined => undefined);
 			await notebookUtils.runAllCells();
 			should(showErrorMessageSpy.calledOnce).be.true('showErrorMessage should be called exactly once');
 		});
@@ -172,13 +172,13 @@ describe('notebookUtils Tests', function (): void {
 
 	describe('addCell', function () {
 		it('shows error when no notebook visible for code cell', async function (): Promise<void> {
-			sinon.replaceGetter(azdata.nb, 'activeNotebookEditor', () => undefined);
+			sinon.replaceGetter(azdata.nb, 'activeNotebookEditor', (): azdata.nb.NotebookEditor | undefined => undefined);
 			await notebookUtils.addCell('code');
 			should(showErrorMessageSpy.calledOnce).be.true('showErrorMessage should be called exactly once');
 		});
 
 		it('shows error when no notebook visible for markdown cell', async function (): Promise<void> {
-			sinon.replaceGetter(azdata.nb, 'activeNotebookEditor', () => undefined);
+			sinon.replaceGetter(azdata.nb, 'activeNotebookEditor', (): azdata.nb.NotebookEditor | undefined => undefined);
 			await notebookUtils.addCell('markdown');
 			should(showErrorMessageSpy.calledOnce).be.true('showErrorMessage should be called exactly once');
 		});

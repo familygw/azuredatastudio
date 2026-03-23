@@ -845,7 +845,7 @@ suite('StoredFileWorkingCopy', function () {
 		let participationCounter = 0;
 		const disposable = accessor.workingCopyFileService.addSaveParticipant({
 			participate: async (wc) => {
-				if (workingCopy === wc) {
+				if ((workingCopy as unknown as typeof wc) === wc) {
 					participationCounter++;
 				}
 			}

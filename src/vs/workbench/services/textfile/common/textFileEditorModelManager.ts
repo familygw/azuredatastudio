@@ -542,7 +542,7 @@ export class TextFileEditorModelManager extends Disposable implements ITextFileE
 
 	//#endregion
 
-	canDispose(model: TextFileEditorModel): true | Promise<true> {
+	canDispose(model: ITextFileEditorModel): true | Promise<true> {
 
 		// quick return if model already disposed or not dirty and not resolving
 		if (
@@ -556,7 +556,7 @@ export class TextFileEditorModelManager extends Disposable implements ITextFileE
 		return this.doCanDispose(model);
 	}
 
-	private async doCanDispose(model: TextFileEditorModel): Promise<true> {
+	private async doCanDispose(model: ITextFileEditorModel): Promise<true> {
 
 		// Await any pending resolves first before proceeding
 		const pendingResolve = this.joinPendingResolves(model.resource);

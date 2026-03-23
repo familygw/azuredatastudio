@@ -43,7 +43,38 @@
 	<script src="{{WORKBENCH_WEB_BASE_URL}}/node_modules/slickgrid/slick.dataview.js"></script>
 	<script src="{{WORKBENCH_WEB_BASE_URL}}/node_modules/slickgrid/slick.editors.js"></script>
 	<script src="{{WORKBENCH_WEB_BASE_URL}}/node_modules/slickgrid/plugins/slick.cellrangedecorator.js"></script>
+	<script>
+		window.__adsZoneDefineState = {
+			globalDefine: globalThis.define,
+			nodeGlobalDefine: typeof global !== 'undefined' ? global.define : undefined,
+			windowDefine: window.define,
+			selfDefine: typeof self !== 'undefined' ? self.define : undefined,
+			amd: globalThis.define && globalThis.define.amd
+		};
+		globalThis.define = undefined;
+		if (typeof global !== 'undefined') {
+			global.define = undefined;
+		}
+		window.define = undefined;
+		if (typeof self !== 'undefined') {
+			self.define = undefined;
+		}
+	</script>
 	<script src="{{WORKBENCH_WEB_BASE_URL}}/node_modules/zone.js/dist/zone.min.js"></script>
+	<script>
+		globalThis.define = window.__adsZoneDefineState.globalDefine;
+		if (typeof global !== 'undefined') {
+			global.define = window.__adsZoneDefineState.nodeGlobalDefine;
+		}
+		window.define = window.__adsZoneDefineState.windowDefine;
+		if (typeof self !== 'undefined') {
+			self.define = window.__adsZoneDefineState.selfDefine;
+		}
+		if (globalThis.define) {
+			globalThis.define.amd = window.__adsZoneDefineState.amd;
+		}
+		delete window.__adsZoneDefineState;
+	</script>
 
 	<script src="{{WORKBENCH_WEB_BASE_URL}}/out/vs/loader.js"></script>
 	<script src="{{WORKBENCH_WEB_BASE_URL}}/out/vs/webPackagePaths.js"></script>

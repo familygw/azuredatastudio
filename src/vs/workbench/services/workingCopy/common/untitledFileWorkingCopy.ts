@@ -90,7 +90,7 @@ export interface IUntitledFileWorkingCopyInitialContents {
 	readonly markModified?: boolean;
 }
 
-export class UntitledFileWorkingCopy<M extends IUntitledFileWorkingCopyModel> extends Disposable implements IUntitledFileWorkingCopy<M>  {
+export class UntitledFileWorkingCopy<M extends IUntitledFileWorkingCopyModel> extends Disposable implements IUntitledFileWorkingCopy<M> {
 
 	readonly capabilities = this.isScratchpad ? WorkingCopyCapabilities.Untitled | WorkingCopyCapabilities.Scratchpad : WorkingCopyCapabilities.Untitled;
 
@@ -166,7 +166,7 @@ export class UntitledFileWorkingCopy<M extends IUntitledFileWorkingCopyModel> ex
 	async resolve(): Promise<void> {
 		this.trace('resolve()');
 
-		if (this.isResolved()) {
+		if (this.model) {
 			this.trace('resolve() - exit (already resolved)');
 
 			// return early if the untitled file working copy is already
@@ -243,7 +243,7 @@ export class UntitledFileWorkingCopy<M extends IUntitledFileWorkingCopyModel> ex
 		this._onDidChangeContent.fire();
 	}
 
-	isResolved() { // {{SQL CARBON EDIT}} - this type constraint is causing compiler errors
+	isResolved(): this is IResolvedUntitledFileWorkingCopy<M> {
 		return !!this.model;
 	}
 
@@ -263,7 +263,7 @@ export class UntitledFileWorkingCopy<M extends IUntitledFileWorkingCopyModel> ex
 		// resolved or not and fallback to the initial value -
 		// if any - to prevent backing up an unresolved working
 		// copy and loosing the initial value.
-		if (this.isResolved()) {
+		if (this.model) {
 			content = await raceCancellation(this.model.snapshot(token), token);
 		} else if (this.initialContents) {
 			content = this.initialContents.value;

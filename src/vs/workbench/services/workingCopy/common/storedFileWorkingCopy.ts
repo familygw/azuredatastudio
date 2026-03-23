@@ -289,7 +289,7 @@ export function isStoredFileWorkingCopySaveEvent(e: IWorkingCopySaveEvent): e is
 	return !!candidate.stat;
 }
 
-export class StoredFileWorkingCopy<M extends IStoredFileWorkingCopyModel> extends ResourceWorkingCopy implements IStoredFileWorkingCopy<M>  {
+export class StoredFileWorkingCopy<M extends IStoredFileWorkingCopyModel> extends ResourceWorkingCopy implements IStoredFileWorkingCopy<M> {
 
 	readonly capabilities: WorkingCopyCapabilities = WorkingCopyCapabilities.None;
 
@@ -416,7 +416,7 @@ export class StoredFileWorkingCopy<M extends IStoredFileWorkingCopyModel> extend
 
 	private lastResolvedFileStat: IFileStatWithMetadata | undefined;
 
-	isResolved(): any { // {{SQL CARBON EDIT}} - remove "this is IResolvedStoredFileWorkingCopy<M>" due to build error
+	isResolved(): this is IResolvedStoredFileWorkingCopy<M> {
 		return !!this.model;
 	}
 
@@ -450,7 +450,7 @@ export class StoredFileWorkingCopy<M extends IStoredFileWorkingCopyModel> extend
 		}
 
 		// Second, check if we have a backup to resolve from (only for new working copies)
-		const isNew = !this.isResolved();
+		const isNew = !this.model;
 		if (isNew) {
 			const resolvedFromBackup = await this.resolveFromBackup();
 			if (resolvedFromBackup) {
@@ -511,7 +511,7 @@ export class StoredFileWorkingCopy<M extends IStoredFileWorkingCopyModel> extend
 		const backup = await this.workingCopyBackupService.resolve<IStoredFileWorkingCopyBackupMetaData>(this);
 
 		// Abort if someone else managed to resolve the working copy by now
-		const isNew = !this.isResolved();
+		const isNew = !this.model;
 		if (!isNew) {
 			this.trace('resolveFromBackup() - exit - withoutresolving because previously new file working copy got created meanwhile');
 
@@ -642,7 +642,7 @@ export class StoredFileWorkingCopy<M extends IStoredFileWorkingCopyModel> extend
 		});
 
 		// Update existing model if we had been resolved
-		if (this.isResolved()) {
+		if (this.model) {
 			await this.doUpdateModel(content.value);
 		}
 

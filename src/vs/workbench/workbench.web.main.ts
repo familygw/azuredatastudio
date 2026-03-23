@@ -226,6 +226,6 @@ import 'sql/workbench/contrib/welcome/browser/gettingStarted.contribution';
 import 'sql/workbench/contrib/telemetry/browser/telemetryOptOut.contribution';
 
 // Azure Data Studio Retirement announcent
-import 'sql/workbench/contrib/welcome/browser/retirementAnnouncement.contribution';
+// import 'sql/workbench/contrib/welcome/browser/retirementAnnouncement.contribution';
 
 //#endregion

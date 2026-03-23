@@ -50,7 +50,7 @@ function createContext(): TestContext {
 describe('DeployedModelService', () => {
 	it('getDeployedModels should fail with no connection', async function (): Promise<void> {
 		const testContext = createContext();
-		let connection: azdata.connection.ConnectionProfile;
+		let connection!: azdata.connection.ConnectionProfile;
 		let importTable: DatabaseTable = {
 			databaseName: 'db',
 			tableName: 'tb',

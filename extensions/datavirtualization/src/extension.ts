@@ -21,23 +21,38 @@ import { TelemetryReporter } from './services/telemetry';
 export function activate(extensionContext: vscode.ExtensionContext): void {
 	let apiWrapper = new ApiWrapper();
 	let appContext = new AppContext(extensionContext, apiWrapper);
-
-	let wizard = managerInstance.onRegisteredApi<DataSourceWizardService>(ApiType.DataSourceWizard);
-	wizard((wizardService: DataSourceWizardService) => {
-		apiWrapper.setCommandContext(constants.CommandContext.WizardServiceEnabled, true);
-
-		extensionContext.subscriptions.push(new OpenVirtualizeDataWizardCommand(appContext, wizardService));
-		apiWrapper.registerTaskHandler(constants.virtualizeDataTask, (profile: azdata.IConnectionProfile) => {
-			new OpenVirtualizeDataWizardTask(appContext, wizardService).execute(profile);
-		});
-
-		extensionContext.subscriptions.push(new OpenMssqlHdfsTableFromFileWizardCommand(appContext, wizardService));
-	});
+	apiWrapper.setCommandContext(constants.CommandContext.WizardServiceEnabled, true);
 
 	const outputChannel = apiWrapper.createOutputChannel(constants.serviceName);
 	let serviceClient = new ServiceClient(apiWrapper, outputChannel);
-	serviceClient.startService(extensionContext).then(success => undefined, err => {
-		apiWrapper.showErrorMessage(utils.getErrorMessage(err));
+	let wizardServicePromise: Promise<DataSourceWizardService> | undefined;
+	const getWizardService = async (): Promise<DataSourceWizardService> => {
+		if (!wizardServicePromise) {
+			const registeredWizardService = new Promise<DataSourceWizardService>((resolve) => {
+				const registration = managerInstance.onRegisteredApi<DataSourceWizardService>(ApiType.DataSourceWizard)((wizardService: DataSourceWizardService) => {
+					registration.dispose();
+					resolve(wizardService);
+				});
+			});
+
+			wizardServicePromise = Promise.all([
+				serviceClient.startService(extensionContext),
+				registeredWizardService
+			]).then(([, wizardService]) => wizardService);
+		}
+
+		try {
+			return await wizardServicePromise;
+		} catch (err) {
+			wizardServicePromise = undefined;
+			throw err;
+		}
+	};
+
+	extensionContext.subscriptions.push(new OpenVirtualizeDataWizardCommand(appContext, getWizardService));
+	apiWrapper.registerTaskHandler(constants.virtualizeDataTask, async (profile: azdata.IConnectionProfile) => {
+		await new OpenVirtualizeDataWizardTask(appContext, getWizardService).execute(profile);
 	});
+	extensionContext.subscriptions.push(new OpenMssqlHdfsTableFromFileWizardCommand(appContext, getWizardService));
 	extensionContext.subscriptions.push(TelemetryReporter);
 }

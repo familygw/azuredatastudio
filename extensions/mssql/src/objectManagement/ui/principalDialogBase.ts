@@ -171,7 +171,7 @@ export abstract class PrincipalDialogBase<ObjectInfoType extends SecurityPrincip
 					name: obj.name,
 					schema: obj.schema,
 					type: obj.type,
-					permissions: securableTypeMetadata.permissions.map(permission => {
+					permissions: securableTypeMetadata.permissions.map((permission): SecurablePermissionItem => {
 						return {
 							permission: permission.name,
 							grantor: '',

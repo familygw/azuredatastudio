@@ -17,6 +17,7 @@ import { ApiWrapper } from '../apiWrapper';
 import * as Constants from '../constants';
 import { TelemetryFeature, DataSourceWizardFeature } from './features';
 import { promises as fs } from 'fs';
+import * as utils from '../utils';
 
 export class ServiceClient {
 	private statusView: vscode.StatusBarItem;
@@ -57,17 +58,28 @@ export class ServiceClient {
 						totalTime: String(processEnd - installationStart),
 						beginningTimestamp: String(installationStart)
 					});
+					resolve();
+				}, e => {
+					const errorMessage = utils.getErrorMessage(e);
+					TelemetryReporter.sendTelemetryEvent('ServiceInitializingFailed');
+					this.outputChannel.appendLine(localize('serviceStartFailed', 'Failed to start {0}: {1}', Constants.serviceName, errorMessage));
+					if (e instanceof Error && e.stack) {
+						this.outputChannel.appendLine(e.stack);
+					}
+					reject(e);
 				});
 				this.statusView.show();
 				this.statusView.text = localize('serviceStarting', 'Starting {0}...', Constants.serviceName);
 				let disposable = client.start();
 				context.subscriptions.push(disposable);
-				resolve();
 			}, e => {
+				const errorMessage = utils.getErrorMessage(e);
 				TelemetryReporter.sendTelemetryEvent('ServiceInitializingFailed');
-				this.apiWrapper.showErrorMessage(localize('serviceStartFailed', 'Failed to start {0}: {1}', Constants.serviceName, e));
-				// Just resolve to avoid unhandled promise. We show the error to the user.
-				resolve();
+				this.outputChannel.appendLine(localize('serviceStartFailed', 'Failed to start {0}: {1}', Constants.serviceName, errorMessage));
+				if (e instanceof Error && e.stack) {
+					this.outputChannel.appendLine(e.stack);
+				}
+				reject(e);
 			});
 		});
 	}
@@ -168,4 +180,3 @@ class CustomOutputChannel implements vscode.OutputChannel {
 		throw new Error('Method not implemented.');
 	}
 }
-

@@ -405,7 +405,7 @@ describe('BookTocManagerTests', function () {
 					'title': 'Duplicated Notebook',
 					'root': duplicatedNotebookPath,
 					'contentFolder': duplicatedNotebookPath,
-					'tocPath': undefined,
+					'tocPath': undefined as string | undefined,
 					'contentPath': path.posix.join(duplicatedNotebookPath, 'notebook5.ipynb'),
 					'tocEntry': [
 						{

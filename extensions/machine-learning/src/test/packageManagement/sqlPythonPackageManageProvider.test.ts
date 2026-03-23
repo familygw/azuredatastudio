@@ -92,7 +92,7 @@ describe('SQL Python Package Manager', () => {
 		let testContext = createContext();
 
 		let connection = new azdata.connection.ConnectionProfile();
-		let packages: nbExtensionApis.IPackageDetails[];
+		let packages!: nbExtensionApis.IPackageDetails[];
 		testContext.apiWrapper.setup(x => x.getCurrentConnection()).returns(() => { return Promise.resolve(connection); });
 		testContext.serverConfigManager.setup(x => x.getPythonPackages(TypeMoq.It.isAny(), TypeMoq.It.isAny())).returns(() => Promise.resolve(packages));
 
@@ -368,7 +368,7 @@ describe('SQL Python Package Manager', () => {
 
 	it('canUseProvider Should return false for no connection', async function (): Promise<void> {
 		let testContext = createContext();
-		let connection: azdata.connection.ConnectionProfile;
+		let connection!: azdata.connection.ConnectionProfile;
 		testContext.apiWrapper.setup(x => x.getCurrentConnection()).returns(() => { return Promise.resolve(connection); });
 
 		let provider = createProvider(testContext);
@@ -432,7 +432,7 @@ describe('SQL Python Package Manager', () => {
 
 	it('getLocations Should return empty array for no connection', async function (): Promise<void> {
 		let testContext = createContext();
-		let connection: azdata.connection.ConnectionProfile;
+		let connection!: azdata.connection.ConnectionProfile;
 		testContext.apiWrapper.setup(x => x.getCurrentConnection()).returns(() => { return Promise.resolve(connection); });
 
 		let provider = createProvider(testContext);

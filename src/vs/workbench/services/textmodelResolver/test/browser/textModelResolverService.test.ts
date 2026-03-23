@@ -35,7 +35,7 @@ suite('Workbench - TextModelResolverService', () => {
 
 	teardown(() => {
 		model?.dispose();
-		(<TextFileEditorModelManager>accessor.textFileService.files).dispose();
+		(accessor.textFileService.files as unknown as TextFileEditorModelManager).dispose();
 		disposables.dispose();
 	});
 

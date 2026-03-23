@@ -81,7 +81,7 @@ suite('Files - TextFileEditorTracker', () => {
 		instantiationService.stub(IEditorService, editorService);
 
 		const accessor = instantiationService.createInstance(TestServiceAccessor);
-		disposables.add((<TextFileEditorModelManager>accessor.textFileService.files));
+		disposables.add(accessor.textFileService.files as unknown as TextFileEditorModelManager);
 
 		disposables.add(instantiationService.createInstance(TestTextFileEditorTracker));
 

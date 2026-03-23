@@ -41,7 +41,7 @@ suite('Files - TextFileEditorModel', () => {
 	});
 
 	teardown(() => {
-		(<TextFileEditorModelManager>accessor.textFileService.files).dispose();
+		(accessor.textFileService.files as unknown as TextFileEditorModelManager).dispose();
 		accessor.fileService.setContent(content);
 		disposables.dispose();
 	});
@@ -313,7 +313,7 @@ suite('Files - TextFileEditorModel', () => {
 		// we have to get the model again from working copy service
 		// because `setEncoding` will resolve it again through the
 		// text file service which is outside our scope
-		model = accessor.workingCopyService.get(model) as TextFileEditorModel;
+		model = accessor.workingCopyService.get(model) as unknown as TextFileEditorModel;
 
 		assert.ok(model.isResolved()); // model got resolved due to decoding
 		model.dispose();
@@ -353,7 +353,7 @@ suite('Files - TextFileEditorModel', () => {
 		// copy was resolved again as part of the language change
 		const listener = accessor.workingCopyService.onDidRegister(e => {
 			if (isEqual(e.resource, model.resource)) {
-				deferredPromise.complete(model as TextFileEditorModel);
+				deferredPromise.complete(model as unknown as TextFileEditorModel);
 			}
 		});
 
@@ -474,7 +474,7 @@ suite('Files - TextFileEditorModel', () => {
 		// we have to get the model again from working copy service
 		// because `setEncoding` will resolve it again through the
 		// text file service which is outside our scope
-		model = accessor.workingCopyService.get(model) as TextFileEditorModel;
+		model = accessor.workingCopyService.get(model) as unknown as TextFileEditorModel;
 
 		assert.strictEqual(model.isDirty(), false);
 		assert.strictEqual(model.isModified(), false);
@@ -641,8 +641,8 @@ suite('Files - TextFileEditorModel', () => {
 		const input1 = disposables.add(createFileEditorInput(instantiationService, toResource.call(this, '/path/index_async2.txt')));
 		const input2 = disposables.add(createFileEditorInput(instantiationService, toResource.call(this, '/path/index_async.txt')));
 
-		const model1 = await input1.resolve() as TextFileEditorModel;
-		const model2 = await input2.resolve() as TextFileEditorModel;
+		const model1 = await input1.resolve() as unknown as TextFileEditorModel;
+		const model2 = await input2.resolve() as unknown as TextFileEditorModel;
 
 		model1.updateTextEditorModel(createTextBufferFactory('foo'));
 
@@ -692,7 +692,7 @@ suite('Files - TextFileEditorModel', () => {
 		const participant = accessor.textFileService.files.addSaveParticipant({
 			participate: async model => {
 				assert.ok(model.isDirty());
-				(model as TextFileEditorModel).updateTextEditorModel(createTextBufferFactory('bar'));
+				(model as unknown as TextFileEditorModel).updateTextEditorModel(createTextBufferFactory('bar'));
 				assert.ok(model.isDirty());
 				eventCounter++;
 			}
@@ -747,7 +747,7 @@ suite('Files - TextFileEditorModel', () => {
 		const participant = accessor.textFileService.files.addSaveParticipant({
 			participate: model => {
 				assert.ok(model.isDirty());
-				(model as TextFileEditorModel).updateTextEditorModel(createTextBufferFactory('bar'));
+				(model as unknown as TextFileEditorModel).updateTextEditorModel(createTextBufferFactory('bar'));
 				assert.ok(model.isDirty());
 				eventCounter++;
 

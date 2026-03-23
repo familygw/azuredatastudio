@@ -1,5 +1,11 @@
 # Change Log
 
+## Unreleased
+
+### Documentation
+
+- Added contributor instructions for building the final local binaries and platform packages for Linux, macOS, and Windows.
+
 ## January 2025 Hotfix
  
 Azure Data Studio 1.51.1 is the latest general availability (GA) release.

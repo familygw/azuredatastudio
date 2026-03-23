@@ -65,7 +65,7 @@ function isLoadMoreCommand(item: TreeElement | undefined): item is LoadMoreComma
 }
 
 function isTimelineItem(item: TreeElement | undefined): item is TimelineItem {
-	return !item?.handle.startsWith('vscode-command:') ?? false;
+	return item ? !item.handle.startsWith('vscode-command:') : false;
 }
 
 function updateRelativeTime(item: TimelineItem, lastRelativeTime: string | undefined): string | undefined {

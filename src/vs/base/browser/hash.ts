@@ -16,7 +16,7 @@ export async function sha1Hex(str: string): Promise<string> {
 		// native crashes in certain cases that we could trace
 		// back to passing node.js `Buffer` around
 		// (https://github.com/microsoft/vscode/issues/114227)
-		const buffer = VSBuffer.fromString(str, { dontUseNodeBuffer: true }).buffer;
+		const buffer = new Uint8Array(VSBuffer.fromString(str, { dontUseNodeBuffer: true }).buffer);
 		const hash = await globalThis.crypto.subtle.digest({ name: 'sha-1' }, buffer);
 
 		return toHexString(hash);

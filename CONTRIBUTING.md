@@ -48,3 +48,5 @@ Don't feel bad if we can't reproduce the issue and ask for more information!
 ## Contributing Fixes
 If you are interested in fixing issues and contributing directly to the code base,
 please see the document [How to Contribute](https://github.com/Microsoft/azuredatastudio/wiki/How-to-Contribute).
+
+For release-oriented local packaging instructions, including how to build the final desktop binaries and platform packages for Linux, macOS, and Windows, see [Build final binaries](docs/build-final-binaries.md).

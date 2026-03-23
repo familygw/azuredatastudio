@@ -31,7 +31,7 @@ suite('WorkingCopyFileService', () => {
 	});
 
 	teardown(() => {
-		(<TextFileEditorModelManager>accessor.textFileService.files).dispose();
+		(accessor.textFileService.files as unknown as TextFileEditorModelManager).dispose();
 		disposables.dispose();
 	});
 

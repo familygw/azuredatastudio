@@ -49,12 +49,13 @@ export default class CodeAdapter implements IPrompter {
 			});
 		}, Promise.resolve());
 
-		return promptResult.catch(err => {
+		return promptResult.catch((err: Error): { [key: string]: T } | undefined => {
 			if (err instanceof EscapeException || err instanceof TypeError) {
 				return undefined;
 			}
 
 			void vscode.window.showErrorMessage(err.message);
+			return undefined;
 		});
 	}
 }

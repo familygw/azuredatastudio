@@ -64,7 +64,7 @@ export function executeBufferedCommand(cmd: string, options: ExecOptions, output
 			if (err) {
 				reject(err);
 			} else {
-				resolve(stdout);
+				resolve(typeof stdout === 'string' ? stdout : stdout.toString());
 			}
 		});
 

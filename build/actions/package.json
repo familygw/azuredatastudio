@@ -16,9 +16,12 @@
   "keywords": [],
   "author": "",
   "dependencies": {
-    "@actions/core": "^1.2.6",
-    "@actions/github": "^5.0.3",
-    "axios": "^1.6.0",
+    "@actions/core": "^3.0.0",
+    "@actions/github": "^9.0.0",
+    "axios": "^1.13.6",
     "typescript": "^3.8.3"
+  },
+  "resolutions": {
+    "undici": "7.24.5"
   }
 }

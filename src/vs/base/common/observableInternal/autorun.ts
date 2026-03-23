@@ -199,7 +199,9 @@ export class AutorunObserver<TChangeSummary = any> implements IObserver, IReader
 			const shouldReact = this._handleChange ? this._handleChange({
 				changedObservable: observable,
 				change,
-				didChange: o => o === observable as any,
+				didChange<T, TChange>(o: IObservable<T, TChange>): this is { change: TChange } {
+					return o === observable as any;
+				},
 			}, this.changeSummary!) : true;
 			if (shouldReact) {
 				this.state = AutorunState.stale;

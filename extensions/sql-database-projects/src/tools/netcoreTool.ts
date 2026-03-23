@@ -144,13 +144,13 @@ export class NetCoreTool extends ShellExecutionHelper {
 			const spawn = child_process.spawn;
 			let child: child_process.ChildProcessWithoutNullStreams;
 			let isSupported: boolean = false;
-			const stdoutBuffers: Buffer[] = [];
+			const stdoutBuffers: Uint8Array[] = [];
 
 			child = spawn('dotnet --version', [], {
 				shell: true
 			});
 
-			child.stdout.on('data', (b: Buffer) => stdoutBuffers.push(b));
+			child.stdout.on('data', (b: Buffer) => stdoutBuffers.push(new Uint8Array(b)));
 
 			await new Promise((resolve, reject) => {
 				child.on('exit', () => {

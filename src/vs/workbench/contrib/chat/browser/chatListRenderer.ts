@@ -602,7 +602,7 @@ export class ChatListItemRenderer extends Disposable implements ITreeRenderer<Ch
 		markdown = new MarkdownString(toRender, {
 			isTrusted: {
 				// Disable all other config options except isTrusted
-				enabledCommands: typeof markdown.isTrusted === 'object' ? markdown.isTrusted?.enabledCommands : [] ?? []
+				enabledCommands: typeof markdown.isTrusted === 'object' ? (markdown.isTrusted.enabledCommands ?? []) : []
 			}
 		});
 

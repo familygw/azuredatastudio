@@ -43,6 +43,7 @@ If you are interested in fixing issues and contributing directly to the code bas
 please see the document [How to Contribute](https://github.com/Microsoft/azuredatastudio/wiki/How-to-Contribute), which covers the following:
 
 * [How to build and run from source](https://github.com/Microsoft/azuredatastudio/wiki/How-to-Contribute#Build-and-Run-From-Source)
+* [How to build final binaries and platform packages for Linux, macOS, and Windows](docs/build-final-binaries.md)
 * [The development workflow, including debugging and running tests](https://github.com/Microsoft/azuredatastudio/wiki/How-to-Contribute#development-workflow)
 * [Submitting pull requests](https://github.com/Microsoft/azuredatastudio/wiki/How-to-Contribute#pull-requests)
 

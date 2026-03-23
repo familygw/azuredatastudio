@@ -310,7 +310,7 @@ export class TextFileEditorModel extends BaseTextEditorModel implements ITextFil
 		}
 
 		// Second, check if we have a backup to resolve from (only for new models)
-		const isNewModel = !this.isResolved();
+		const isNewModel = !this.textEditorModel;
 		if (isNewModel) {
 			const resolvedFromBackup = await this.resolveFromBackup(options);
 			if (resolvedFromBackup) {
@@ -380,7 +380,7 @@ export class TextFileEditorModel extends BaseTextEditorModel implements ITextFil
 		}
 
 		// Abort if someone else managed to resolve the model by now
-		const isNewModel = !this.isResolved();
+		const isNewModel = !this.textEditorModel;
 		if (!isNewModel) {
 			this.trace('resolveFromBackup() - exit - without resolving because previously new model got created meanwhile');
 
@@ -1160,7 +1160,7 @@ export class TextFileEditorModel extends BaseTextEditorModel implements ITextFil
 		this.logService.trace(`[text file model] ${msg}`, this.resource.toString());
 	}
 
-	override isResolved(): any { //{{SQL CARBON EDIT}} - remove "this is IResolvedTextFileEditorModel" due to build error
+	override isResolved(): this is IResolvedTextFileEditorModel {
 		return !!this.textEditorModel;
 	}
 

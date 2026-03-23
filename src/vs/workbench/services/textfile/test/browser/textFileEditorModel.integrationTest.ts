@@ -30,7 +30,7 @@ suite('Files - TextFileEditorModel (integration)', () => {
 	});
 
 	teardown(() => {
-		(<TextFileEditorModelManager>accessor.textFileService.files).dispose();
+		(accessor.textFileService.files as unknown as TextFileEditorModelManager).dispose();
 		accessor.fileService.setContent(content);
 		disposables.dispose();
 	});

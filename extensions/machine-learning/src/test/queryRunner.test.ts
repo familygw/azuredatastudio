@@ -57,7 +57,7 @@ describe('Query Runner', () => {
 		let testContext = createContext();
 		let connection = new azdata.connection.ConnectionProfile();
 		let queryRunner = new QueryRunner(testContext.apiWrapper.object);
-		let queryProvider: azdata.QueryProvider;
+		let queryProvider!: azdata.QueryProvider;
 		testContext.apiWrapper.setup(x => x.getProvider<azdata.QueryProvider>(TypeMoq.It.isAny(), TypeMoq.It.isAny())).returns(() => queryProvider);
 
 		let actual = await queryRunner.getPythonPackages(connection, connection.databaseName);

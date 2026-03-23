@@ -74,7 +74,7 @@ suite('WorkingCopyBackupTracker (native)', function () {
 		}
 
 		waitForReady(): Promise<void> {
-			return super.whenReady;
+			return this.whenReady;
 		}
 
 		get pendingBackupOperationCount(): number { return this.pendingBackupOperations.size; }
@@ -127,7 +127,7 @@ suite('WorkingCopyBackupTracker (native)', function () {
 
 		const instantiationService = workbenchInstantiationService(undefined, disposables);
 		accessor = instantiationService.createInstance(TestServiceAccessor);
-		disposables.add((<TextFileEditorModelManager>accessor.textFileService.files));
+		disposables.add(accessor.textFileService.files as unknown as TextFileEditorModelManager);
 
 		disposables.add(registerTestFileEditor());
 

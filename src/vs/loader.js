@@ -648,12 +648,12 @@ var AMDLoader;
 					errorback(err);
 					return;
 				}
-				moduleManager.enqueueDefineAnonymousModule([], () => moduleExports);
+				moduleManager.defineModule(pieces[1], [], () => moduleExports, null, null);
 				callback();
 			}
 			else {
 				let script = document.createElement('script');
-				script.setAttribute('async', 'async');
+				script.async = false;
 				script.setAttribute('type', 'text/javascript');
 				this.attachListeners(script, callback, errorback);
 				const { trustedTypesPolicy } = moduleManager.getConfig().getOptionsLiteral();

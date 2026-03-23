@@ -200,7 +200,8 @@ export class GitHubServer implements IGitHubServer {
 				throw new Error(`${result.status} ${result.statusText}`);
 			}
 		} catch (e) {
-			this._logger.warn('Failed to delete token from server.' + e.message ?? e);
+			const errorMessage = e instanceof Error ? e.message : String(e);
+			this._logger.warn('Failed to delete token from server.' + errorMessage);
 		}
 	}
 

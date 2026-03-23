@@ -7,7 +7,7 @@ import { DisposableMap } from 'vs/base/common/lifecycle';
 import { IInlineChatBulkEditResponse, IInlineChatResponse, IInlineChatService } from 'vs/workbench/contrib/inlineChat/common/inlineChat';
 import { IUriIdentityService } from 'vs/platform/uriIdentity/common/uriIdentity';
 import { reviveWorkspaceEditDto } from 'vs/workbench/api/browser/mainThreadBulkEdits';
-import { ExtHostContext, ExtHostInlineChatShape, MainContext, MainThreadInlineChatShape as MainThreadInlineChatShape } from 'vs/workbench/api/common/extHost.protocol';
+import { ExtHostContext, ExtHostInlineChatShape, IWorkspaceEditDto, MainContext, MainThreadInlineChatShape as MainThreadInlineChatShape } from 'vs/workbench/api/common/extHost.protocol';
 import { IExtHostContext, extHostNamedCustomer } from 'vs/workbench/services/extensions/common/extHostCustomers';
 import { TextEdit } from 'vs/editor/common/languages';
 import { IProgress } from 'vs/platform/progress/common/progress';
@@ -53,7 +53,7 @@ export class MainThreadInlineChat implements MainThreadInlineChatShape {
 				try {
 					const result = await this._proxy.$provideResponse(handle, item, request, token);
 					if (result?.type === 'bulkEdit') {
-						(<IInlineChatBulkEditResponse>result).edits = reviveWorkspaceEditDto(result.edits, this._uriIdentService);
+						(<IInlineChatBulkEditResponse>result).edits = reviveWorkspaceEditDto(result.edits as IWorkspaceEditDto, this._uriIdentService);
 					}
 					return <IInlineChatResponse | undefined>result;
 				} finally {

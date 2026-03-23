@@ -184,7 +184,7 @@ suite('Files - FileEditorInput', () => {
 		const input = createFileInput(toResource.call(this, '/foo/bar/file.js'), undefined, languageId);
 		assert.strictEqual(input.getPreferredLanguageId(), languageId);
 
-		const model = await input.resolve() as TextFileEditorModel;
+		const model = await input.resolve() as unknown as TextFileEditorModel;
 		assert.strictEqual(model.textEditorModel!.getLanguageId(), languageId);
 
 		input.setLanguageId('text');
@@ -194,7 +194,7 @@ suite('Files - FileEditorInput', () => {
 		const input2 = createFileInput(toResource.call(this, '/foo/bar/file.js'));
 		input2.setPreferredLanguageId(languageId);
 
-		const model2 = await input2.resolve() as TextFileEditorModel;
+		const model2 = await input2.resolve() as unknown as TextFileEditorModel;
 		assert.strictEqual(model2.textEditorModel!.getLanguageId(), languageId);
 
 		registration.dispose();
@@ -203,7 +203,7 @@ suite('Files - FileEditorInput', () => {
 	test('preferred contents', async function () {
 		const input = createFileInput(toResource.call(this, '/foo/bar/file.js'), undefined, undefined, undefined, undefined, 'My contents');
 
-		const model = await input.resolve() as TextFileEditorModel;
+		const model = await input.resolve() as unknown as TextFileEditorModel;
 		assert.strictEqual(model.textEditorModel!.getValue(), 'My contents');
 		assert.strictEqual(input.isDirty(), true);
 
@@ -224,7 +224,7 @@ suite('Files - FileEditorInput', () => {
 		const input2 = createFileInput(toResource.call(this, '/foo/bar/file.js'));
 		input2.setPreferredContents('My contents');
 
-		const model2 = await input2.resolve() as TextFileEditorModel;
+		const model2 = await input2.resolve() as unknown as TextFileEditorModel;
 		assert.strictEqual(model2.textEditorModel!.getValue(), 'My contents');
 		assert.strictEqual(input2.isDirty(), true);
 	});
@@ -248,7 +248,7 @@ suite('Files - FileEditorInput', () => {
 		await input.setEncoding('utf16', EncodingMode.Encode);
 		assert.strictEqual(input.getEncoding(), 'utf16');
 
-		const resolved = await input.resolve() as TextFileEditorModel;
+		const resolved = await input.resolve() as unknown as TextFileEditorModel;
 		assert.strictEqual(input.getEncoding(), resolved.getEncoding());
 		resolved.dispose();
 	});
@@ -256,7 +256,7 @@ suite('Files - FileEditorInput', () => {
 	test('save', async function () {
 		const input = createFileInput(toResource.call(this, '/foo/bar/updatefile.js'));
 
-		const resolved = await input.resolve() as TextFileEditorModel;
+		const resolved = await input.resolve() as unknown as TextFileEditorModel;
 		resolved.textEditorModel!.setValue('changed');
 		assert.ok(input.isDirty());
 		assert.ok(input.isModified());
@@ -270,7 +270,7 @@ suite('Files - FileEditorInput', () => {
 	test('revert', async function () {
 		const input = createFileInput(toResource.call(this, '/foo/bar/updatefile.js'));
 
-		const resolved = await input.resolve() as TextFileEditorModel;
+		const resolved = await input.resolve() as unknown as TextFileEditorModel;
 		resolved.textEditorModel!.setValue('changed');
 		assert.ok(input.isDirty());
 		assert.ok(input.isModified());

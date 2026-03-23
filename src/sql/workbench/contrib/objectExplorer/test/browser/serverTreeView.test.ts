@@ -53,7 +53,7 @@ suite('ServerTreeView onAddConnectionProfile handler tests', () => {
 	});
 
 	async function runAddConnectionProfileHandler(oldSelection, newProfile): Promise<void> {
-		mockTree.setup(x => x.getSelection()).returns(() => [oldSelection] || []);
+		mockTree.setup(x => x.getSelection()).returns(() => oldSelection ? [oldSelection] : []);
 		return (serverTreeView as any).handleAddConnectionProfile(newProfile);
 	}
 

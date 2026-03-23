@@ -14,7 +14,7 @@ import { MainThreadTelemetryShape } from 'vs/workbench/api/common/extHost.protoc
 import { IExtensionHostInitData } from 'vs/workbench/services/extensions/common/extensionHostProtocol';
 import { ExtHostExtensionService } from 'vs/workbench/api/node/extHostExtensionService';
 import { URI } from 'vs/base/common/uri';
-import { ILogService } from 'vs/platform/log/common/log';
+import { ILogService, LogLevel as CoreLogLevel } from 'vs/platform/log/common/log';
 import { IExtensionDescription } from 'vs/platform/extensions/common/extensions';
 import { LogLevel, createHttpPatch, createProxyResolver, createTlsPatch, ProxySupportSetting, ProxyAgentParams, createNetPatch } from '@vscode/proxy-agent';
 
@@ -53,7 +53,17 @@ export function connectProxyResolver(
 				extHostLogService.error(message, ...args);
 			}
 		},
-		getLogLevel: () => extHostLogService.getLevel(),
+		getLogLevel: () => {
+			switch (extHostLogService.getLevel()) {
+				case CoreLogLevel.Trace: return LogLevel.Trace;
+				case CoreLogLevel.Debug: return LogLevel.Debug;
+				case CoreLogLevel.Info: return LogLevel.Info;
+				case CoreLogLevel.Warning: return LogLevel.Warning;
+				case CoreLogLevel.Error: return LogLevel.Error;
+				case CoreLogLevel.Off: return LogLevel.Off;
+				default: return LogLevel.Off;
+			}
+		},
 		// TODO @chrmarti Remove this from proxy agent
 		proxyResolveTelemetry: () => { },
 		useHostProxy: doUseHostProxy,

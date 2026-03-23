@@ -61,7 +61,7 @@ describe('Package Manager', () => {
 
 	it('Manage Package command Should show an error for no connection', async function (): Promise<void> {
 		let testContext = createContext();
-		let connection: azdata.connection.ConnectionProfile;
+		let connection!: azdata.connection.ConnectionProfile;
 		testContext.apiWrapper.setup(x => x.getCurrentConnection()).returns(() => {return Promise.resolve(connection);});
 		testContext.apiWrapper.setup(x => x.executeCommand(TypeMoq.It.isAny(), TypeMoq.It.isAny(), TypeMoq.It.isAny(), TypeMoq.It.isAny())).returns(() => {return Promise.resolve();});
 		testContext.apiWrapper.setup(x => x.showInfoMessage(TypeMoq.It.isAny(), TypeMoq.It.isAny()));

@@ -20,9 +20,9 @@ import { HdfsFileSourceNode } from '../hdfsProvider';
 export class OpenVirtualizeDataWizardCommand extends Command {
 	private readonly dataWizardTask: OpenVirtualizeDataWizardTask;
 
-	constructor(appContext: AppContext, wizardService: DataSourceWizardService) {
+	constructor(appContext: AppContext, getWizardService: () => Promise<DataSourceWizardService>) {
 		super(constants.virtualizeDataCommand, appContext);
-		this.dataWizardTask = new OpenVirtualizeDataWizardTask(appContext, wizardService);
+		this.dataWizardTask = new OpenVirtualizeDataWizardTask(appContext, getWizardService);
 	}
 
 	protected async preExecute(context: ICommandUnknownContext | ICommandObjectExplorerContext, args: object = {}): Promise<any> {
@@ -39,7 +39,7 @@ export class OpenVirtualizeDataWizardCommand extends Command {
 }
 
 export class OpenVirtualizeDataWizardTask {
-	constructor(private appContext: AppContext, private wizardService: DataSourceWizardService) {
+	constructor(private appContext: AppContext, private getWizardService: () => Promise<DataSourceWizardService>) {
 	}
 
 	async execute(profile: azdata.IConnectionProfile, ...args: any[]): Promise<void> {
@@ -54,7 +54,8 @@ export class OpenVirtualizeDataWizardTask {
 					return;
 				}
 			}
-			let wizard = new VirtualizeDataWizard(connection, this.wizardService, this.appContext);
+			const wizardService = await this.getWizardService();
+			let wizard = new VirtualizeDataWizard(connection, wizardService, this.appContext);
 			await wizard.openWizard();
 		} catch (error) {
 			this.appContext.apiWrapper.showErrorMessage(getErrorMessage(error));
@@ -63,7 +64,7 @@ export class OpenVirtualizeDataWizardTask {
 }
 
 export class OpenMssqlHdfsTableFromFileWizardCommand extends Command {
-	constructor(appContext: AppContext, private wizardService: DataSourceWizardService) {
+	constructor(appContext: AppContext, private getWizardService: () => Promise<DataSourceWizardService>) {
 		super(constants.mssqlHdfsTableFromFileCommand, appContext);
 	}
 
@@ -86,8 +87,9 @@ export class OpenMssqlHdfsTableFromFileWizardCommand extends Command {
 				}
 			}
 
+			const wizardService = await this.getWizardService();
 			let fileNode = await getNodeFromMssqlProvider<HdfsFileSourceNode>(context, this.appContext);
-			let wizard = new TableFromFileWizard(connection, this.appContext, this.wizardService);
+			let wizard = new TableFromFileWizard(connection, this.appContext, wizardService);
 			await wizard.start(fileNode);
 		} catch (error) {
 			this.appContext.apiWrapper.showErrorMessage(getErrorMessage(error));

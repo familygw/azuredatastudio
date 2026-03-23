@@ -19,19 +19,62 @@ define(['require', 'exports'], function (require) {
 	require.__$__nodeRequire('html-to-image/dist/html-to-image.js');
 	require.__$__nodeRequire('reflect-metadata');
 	require.__$__nodeRequire('chart.js');
+	const fs = require.__$__nodeRequire('fs');
+	const path = require.__$__nodeRequire('path');
 	// VS Code uses an AMD loader for its own files (and ours) but Node.JS normally uses commonjs. For modules that
 	// support UMD this may cause some issues since it will appear to them that AMD exists and so depending on the order
 	// they check support for the two types they may end up using either commonjs or AMD. If commonjs is first this is
 	// the expected method and so nothing needs to be done - but if it's AMD then the VS Code loader will throw an error
 	// (Can only have one anonymous define call per script file) since it only expects to be loading its own files.
 
-	// In order to make packages like zone.js load correctly we need to temporarily set AMD to false so that the modules
-	// load using commonjs before continuing.
-	const amd = define.amd;
-	define.amd = false;
-	require.__$__nodeRequire('zone.js/dist/zone');
-	require.__$__nodeRequire('zone.js/dist/zone-error');
-	define.amd = amd;
+	// zone.js v0.11+ still ships UMD bundles under `dist/`, but those wrappers prefer AMD when `define.amd` exists.
+	// Even `__$__nodeRequire` runs in the renderer context, so the VS Code loader can still intercept the anonymous
+	// define call. Evaluate the bundle with a local `define` parameter set to `undefined` to force the non-AMD path.
+	function loadNonAmdBundle(moduleName) {
+		const bundlePath = path.join(process.cwd(), 'node_modules', ...moduleName.split('/')) + '.js';
+		const bundleSource = fs.readFileSync(bundlePath, 'utf8').replace(
+			/typeof define === 'function' && define\.amd \? define\(factory\) :\s*factory\(\);/,
+			'factory();'
+		);
+		const executeBundle = new Function(`${bundleSource}\n//# sourceURL=ads-zone-eval://${moduleName}`);
+		const globalDefine = globalThis.define;
+		const nodeGlobalDefine = typeof global !== 'undefined' ? global.define : undefined;
+		const windowDefine = window.define;
+		const selfDefine = typeof self !== 'undefined' ? self.define : undefined;
+		try {
+			globalThis.define = undefined;
+			if (typeof global !== 'undefined') {
+				global.define = undefined;
+			}
+			window.define = undefined;
+			if (typeof self !== 'undefined') {
+				self.define = undefined;
+			}
+			executeBundle.call(globalThis);
+		} finally {
+			globalThis.define = globalDefine;
+			if (typeof global !== 'undefined') {
+				global.define = nodeGlobalDefine;
+			}
+			window.define = windowDefine;
+			if (typeof self !== 'undefined') {
+				self.define = selfDefine;
+			}
+		}
+	}
+
+	if (!window.Zone) {
+		const unpatchedEvents = globalThis.__zone_symbol__UNPATCHED_EVENTS ?? [];
+		if (!unpatchedEvents.includes('load')) {
+			unpatchedEvents.push('load');
+		}
+		if (!unpatchedEvents.includes('error')) {
+			unpatchedEvents.push('error');
+		}
+		globalThis.__zone_symbol__UNPATCHED_EVENTS = unpatchedEvents;
+		loadNonAmdBundle('zone.js/dist/zone');
+		loadNonAmdBundle('zone.js/dist/zone-error');
+	}
 
 	window['Zone']['__zone_symbol__ignoreConsoleErrorUncaughtError'] = true;
 	window['Zone']['__zone_symbol__unhandledPromiseRejectionHandler'] = e => setImmediate(() => {

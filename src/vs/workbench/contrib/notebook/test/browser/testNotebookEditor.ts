@@ -149,6 +149,10 @@ export class NotebookEditorTestModel extends EditorModel implements INotebookEdi
 		return this._notebook;
 	}
 
+	override isResolved(): this is IResolvedNotebookEditorModel {
+		return true;
+	}
+
 	async load(): Promise<IResolvedNotebookEditorModel> {
 		return this;
 	}

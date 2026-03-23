@@ -225,12 +225,12 @@ suite('Files - TextFileEditorModelManager', () => {
 		const manager = accessor.textFileService.files as ITestTextFileEditorModelManager;
 		const resource = URI.file('/test.html');
 
-		let resolvedModel: unknown;
+		let resolvedModel: TextFileEditorModel | undefined;
 
 		const contents: string[] = [];
 		manager.onDidResolve(e => {
 			if (e.model.resource.toString() === resource.toString()) {
-				resolvedModel = e.model as TextFileEditorModel;
+				resolvedModel = e.model as unknown as TextFileEditorModel;
 				contents.push(e.model.textEditorModel!.getValue());
 			}
 		});
@@ -340,11 +340,11 @@ suite('Files - TextFileEditorModelManager', () => {
 		const model2 = await manager.resolve(resource2, { encoding: 'utf8' });
 		assert.strictEqual(resolvedCounter, 2);
 
-		(model1 as TextFileEditorModel).updateTextEditorModel(createTextBufferFactory('changed'));
+		(model1 as unknown as TextFileEditorModel).updateTextEditorModel(createTextBufferFactory('changed'));
 		model1.updatePreferredEncoding('utf16');
 
 		await model1.revert();
-		(model1 as TextFileEditorModel).updateTextEditorModel(createTextBufferFactory('changed again'));
+		(model1 as unknown as TextFileEditorModel).updateTextEditorModel(createTextBufferFactory('changed again'));
 
 		await model1.save();
 		model1.dispose();
@@ -384,9 +384,9 @@ suite('Files - TextFileEditorModelManager', () => {
 		const resource = toResource.call(this, '/path/index_something.txt');
 
 		const model = await manager.resolve(resource, { encoding: 'utf8' });
-		(model as TextFileEditorModel).updateTextEditorModel(createTextBufferFactory('make dirty'));
+		(model as unknown as TextFileEditorModel).updateTextEditorModel(createTextBufferFactory('make dirty'));
 
-		const canDisposePromise = manager.canDispose(model as TextFileEditorModel);
+		const canDisposePromise = manager.canDispose(model);
 		assert.ok(canDisposePromise instanceof Promise);
 
 		let canDispose = false;
@@ -401,7 +401,7 @@ suite('Files - TextFileEditorModelManager', () => {
 
 		assert.strictEqual(canDispose, true);
 
-		const canDispose2 = manager.canDispose(model as TextFileEditorModel);
+		const canDispose2 = manager.canDispose(model);
 		assert.strictEqual(canDispose2, true);
 
 		manager.dispose();

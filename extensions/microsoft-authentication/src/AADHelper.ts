@@ -519,7 +519,8 @@ export class AzureActiveDirectoryService {
 			label = claims.email ?? claims.unique_name ?? claims.preferred_username ?? 'user@example.com';
 		}
 
-		const id = `${claims.tid}/${(claims.oid ?? (claims.altsecid ?? '' + claims.ipd ?? ''))}`;
+		const accountId = claims.oid ?? claims.altsecid ?? `${claims.ipd ?? ''}`;
+		const id = `${claims.tid}/${accountId}`;
 		return {
 			expiresIn: json.expires_in,
 			expiresAt: json.expires_in ? Date.now() + json.expires_in * 1000 : undefined,

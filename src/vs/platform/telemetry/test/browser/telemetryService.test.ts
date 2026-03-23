@@ -15,7 +15,7 @@ import { TelemetryConfiguration, TelemetryLevel } from 'vs/platform/telemetry/co
 import { ITelemetryServiceConfig, TelemetryService } from 'vs/platform/telemetry/common/telemetryService';
 import { ITelemetryAppender, NullAppender } from 'vs/platform/telemetry/common/telemetryUtils';
 
-const sinonTestFn = sinonTest(sinon);
+const sinonTestFn = sinonTest(sinon as unknown as Parameters<typeof sinonTest>[0]);
 
 class TestTelemetryAppender implements ITelemetryAppender {
 

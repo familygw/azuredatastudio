@@ -61,7 +61,7 @@ suite('Files - NativeTextFileService i/o', function () {
 		},
 
 		teardown: async () => {
-			(<TextFileEditorModelManager>service.files).dispose();
+			(service.files as unknown as TextFileEditorModelManager).dispose();
 
 			disposables.clear();
 		},

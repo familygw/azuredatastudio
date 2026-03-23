@@ -207,4 +207,4 @@ import 'sql/workbench/contrib/commandLine/electron-sandbox/commandLine.contribut
 import 'sql/workbench/contrib/welcome/electron-sandbox/gettingStarted.contribution';
 
 // Azure Data Studio Retirement announcent
-import 'sql/workbench/contrib/welcome/browser/retirementAnnouncement.contribution';
+// import 'sql/workbench/contrib/welcome/browser/retirementAnnouncement.contribution';

@@ -46,7 +46,7 @@ suite('Files - NativeTextFileService', function () {
 	});
 
 	teardown(() => {
-		(<TextFileEditorModelManager>service.files).dispose();
+		(service.files as unknown as TextFileEditorModelManager).dispose();
 
 		disposables.clear();
 	});
