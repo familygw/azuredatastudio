@@ -9,6 +9,7 @@ import { IKeybindingService } from 'vs/platform/keybinding/common/keybinding';
 import { ILayoutService } from 'vs/platform/layout/browser/layoutService';
 import { ILogService } from 'vs/platform/log/common/log';
 import { IProductService } from 'vs/platform/product/common/productService';
+import { IThemeService } from 'vs/platform/theme/common/themeService';
 import { Registry } from 'vs/platform/registry/common/platform';
 import { IWorkbenchContribution, IWorkbenchContributionsRegistry, Extensions as WorkbenchExtensions } from 'vs/workbench/common/contributions';
 import { IDialogsModel, IDialogViewItem } from 'vs/workbench/common/dialogs';
@@ -31,11 +32,12 @@ export class DialogHandlerContribution extends Disposable implements IWorkbenchC
 		@IKeybindingService keybindingService: IKeybindingService,
 		@IInstantiationService instantiationService: IInstantiationService,
 		@IProductService productService: IProductService,
-		@IClipboardService clipboardService: IClipboardService
+		@IClipboardService clipboardService: IClipboardService,
+		@IThemeService themeService: IThemeService
 	) {
 		super();
 
-		this.impl = new BrowserDialogHandler(logService, layoutService, keybindingService, instantiationService, productService, clipboardService);
+		this.impl = new BrowserDialogHandler(logService, layoutService, keybindingService, instantiationService, productService, clipboardService, themeService);
 
 		this.model = (this.dialogService as DialogService).model;
 

@@ -1,0 +1,308 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Carlos A. Leguizamón. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.ads-brand-surface-host {
+	--ads-brand-display-font: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+	--ads-brand-ui-font: "Segoe UI", "SF Pro Text", "Helvetica Neue", sans-serif;
+	--ads-brand-mono-font: var(--monaco-monospace-font);
+	width: 100%;
+}
+
+.ads-brand-surface {
+	position: relative;
+	overflow: hidden;
+	border-radius: 28px;
+	border: 1px solid var(--ads-brand-border);
+	padding: 28px;
+	background:
+		linear-gradient(145deg, var(--ads-brand-panel-alt), transparent 50%),
+		linear-gradient(180deg, var(--ads-brand-panel), var(--ads-brand-background));
+	box-shadow: 0 28px 90px var(--ads-brand-shadow);
+	color: var(--ads-brand-ink);
+	font-family: var(--ads-brand-ui-font);
+	isolation: isolate;
+}
+
+.ads-brand-surface__backdrop {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+}
+
+.ads-brand-surface__orb {
+	position: absolute;
+	border-radius: 999px;
+	filter: blur(10px);
+	opacity: 0.9;
+}
+
+.ads-brand-surface__orb--primary {
+	width: 280px;
+	height: 280px;
+	top: -110px;
+	right: -30px;
+	background: radial-gradient(circle, var(--ads-brand-glow) 0%, transparent 72%);
+}
+
+.ads-brand-surface__orb--secondary {
+	width: 260px;
+	height: 260px;
+	bottom: -120px;
+	left: -60px;
+	background: radial-gradient(circle, var(--ads-brand-glow-alt) 0%, transparent 76%);
+}
+
+.ads-brand-surface__mesh {
+	position: absolute;
+	inset: 0;
+	background-image:
+		linear-gradient(90deg, var(--ads-brand-hairline) 1px, transparent 1px),
+		linear-gradient(var(--ads-brand-hairline) 1px, transparent 1px);
+	background-size: 36px 36px;
+	mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.48), transparent 78%);
+	opacity: 0.35;
+}
+
+.ads-brand-surface__frame {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+	gap: 24px;
+	align-items: stretch;
+}
+
+.ads-brand-surface__brand {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	padding: 22px;
+	border-radius: 22px;
+	background: linear-gradient(180deg, var(--ads-brand-panel-alt), var(--ads-brand-entry));
+	border: 1px solid var(--ads-brand-border);
+	backdrop-filter: blur(10px);
+}
+
+.ads-brand-surface__mark {
+	width: 84px;
+	height: 84px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 10px;
+	border-radius: 24px;
+	background:
+		linear-gradient(160deg, var(--ads-brand-glow), var(--ads-brand-glow-alt)),
+		var(--ads-brand-panel);
+	border: 1px solid var(--ads-brand-border);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.ads-brand-surface__mark svg {
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+
+.ads-brand-surface__eyebrow {
+	font-size: 11px;
+	letter-spacing: 0.28em;
+	text-transform: uppercase;
+	color: var(--ads-brand-muted);
+}
+
+.ads-brand-surface__title {
+	margin: 0;
+	font-family: var(--ads-brand-display-font);
+	font-size: clamp(32px, 4vw, 46px);
+	font-weight: 600;
+	line-height: 1.04;
+	letter-spacing: -0.04em;
+}
+
+.ads-brand-surface__subtitle {
+	margin: 0;
+	max-width: 42ch;
+	font-size: 14px;
+	line-height: 1.6;
+	color: var(--ads-brand-muted);
+}
+
+.ads-brand-surface__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: auto;
+}
+
+.ads-brand-surface__chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	border-radius: 999px;
+	border: 1px solid var(--ads-brand-border);
+	background: var(--ads-brand-chip);
+	backdrop-filter: blur(8px);
+}
+
+.ads-brand-surface__chip-label {
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: var(--ads-brand-muted);
+}
+
+.ads-brand-surface__chip-value {
+	font-family: var(--ads-brand-mono-font);
+	font-size: 11px;
+}
+
+.ads-brand-surface__meta {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+	margin: 0;
+}
+
+.ads-brand-surface__meta-cell {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	min-width: 0;
+	padding: 14px 16px;
+	border-radius: 18px;
+	background: var(--ads-brand-entry);
+	border: 1px solid var(--ads-brand-hairline);
+	backdrop-filter: blur(10px);
+}
+
+.ads-brand-surface__meta-label {
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: var(--ads-brand-muted);
+}
+
+.ads-brand-surface__meta-value {
+	margin: 0;
+	font-family: var(--ads-brand-mono-font);
+	font-size: 12px;
+	line-height: 1.55;
+	overflow-wrap: anywhere;
+}
+
+.ads-about-dialog {
+	width: min(780px, 92vw);
+	min-width: 0;
+	max-width: 92vw;
+	padding: 0;
+	border-radius: 28px;
+	overflow: hidden;
+	background: transparent !important;
+	border: 0 !important;
+	box-shadow: none !important;
+	outline: none !important;
+}
+
+.ads-about-dialog:focus,
+.ads-about-dialog:focus-visible {
+	outline: none !important;
+	box-shadow: none !important;
+}
+
+.ads-about-dialog .dialog-shadow {
+	box-shadow: none !important;
+}
+
+.ads-about-dialog .dialog-toolbar-row {
+	display: none;
+}
+
+.ads-about-dialog .dialog-message-row {
+	padding: 0;
+}
+
+.ads-about-dialog .dialog-message-row>.dialog-icon.no-codicon {
+	display: none;
+	flex: 0 0 0;
+	width: 0;
+	height: 0;
+}
+
+.ads-about-dialog .dialog-message-container {
+	gap: 0 !important;
+	padding-left: 0 !important;
+}
+
+.ads-about-dialog .dialog-message {
+	display: none;
+}
+
+.ads-about-dialog .dialog-message-text {
+	font-size: 11px;
+	letter-spacing: 0.28em;
+	text-transform: uppercase;
+	color: var(--ads-brand-muted);
+	font-family: var(--ads-brand-ui-font);
+}
+
+.ads-about-dialog .dialog-message-detail {
+	display: none;
+}
+
+.ads-about-dialog .dialog-message-body {
+	width: 100%;
+}
+
+.ads-about-dialog .dialog-message-body>.ads-brand-surface {
+	border-radius: 28px 28px 0 0;
+	border-bottom: 0;
+	box-shadow: none;
+}
+
+.ads-about-dialog>.dialog-buttons-row {
+	padding: 16px 28px 24px;
+	background:
+		linear-gradient(180deg, var(--ads-brand-panel-alt), var(--ads-brand-background));
+	border: 1px solid var(--ads-brand-border);
+	border-top: 0;
+	border-radius: 0 0 28px 28px;
+}
+
+.ads-about-dialog>.dialog-buttons-row>.dialog-buttons {
+	margin-left: 0;
+	gap: 8px;
+}
+
+@media (max-width: 760px) {
+	.ads-about-dialog {
+		border-radius: 24px;
+	}
+
+	.ads-about-dialog .dialog-message-body>.ads-brand-surface {
+		border-radius: 24px 24px 0 0;
+	}
+
+	.ads-about-dialog>.dialog-buttons-row {
+		padding: 14px 20px 20px;
+		border-radius: 0 0 24px 24px;
+	}
+
+	.ads-brand-surface {
+		padding: 20px;
+		border-radius: 24px;
+	}
+
+	.ads-brand-surface__frame {
+		grid-template-columns: 1fr;
+	}
+
+	.ads-brand-surface__meta {
+		grid-template-columns: 1fr;
+	}
+}

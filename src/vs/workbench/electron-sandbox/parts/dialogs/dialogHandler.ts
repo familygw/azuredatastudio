@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { localize } from 'vs/nls';
-import { fromNow } from 'vs/base/common/date';
 import { isLinuxSnap } from 'vs/base/common/platform';
 import { IClipboardService } from 'vs/platform/clipboard/common/clipboardService';
 import { AbstractDialogHandler, IConfirmation, IConfirmationResult, IPrompt, IPromptResult } from 'vs/platform/dialogs/common/dialogs';
@@ -13,6 +12,10 @@ import { INativeHostService } from 'vs/platform/native/common/native';
 import { IProductService } from 'vs/platform/product/common/productService';
 import { process } from 'vs/base/parts/sandbox/electron-sandbox/globals';
 import { aboutDetail } from 'sql/base/common/locConstants'; // {{SQL CARBON EDIT}} Imports about detail localized string for ADS about dialog
+import { ILayoutService } from 'vs/platform/layout/browser/layoutService';
+import { IKeybindingService } from 'vs/platform/keybinding/common/keybinding';
+import { IThemeService } from 'vs/platform/theme/common/themeService';
+import { IBrandSurfaceEntry, showBrandDialog } from 'vs/workbench/browser/parts/dialogs/aboutSplash';
 
 export class NativeDialogHandler extends AbstractDialogHandler {
 
@@ -20,7 +23,10 @@ export class NativeDialogHandler extends AbstractDialogHandler {
 		@ILogService private readonly logService: ILogService,
 		@INativeHostService private readonly nativeHostService: INativeHostService,
 		@IProductService private readonly productService: IProductService,
-		@IClipboardService private readonly clipboardService: IClipboardService
+		@IClipboardService private readonly clipboardService: IClipboardService,
+		@ILayoutService private readonly layoutService: ILayoutService,
+		@IKeybindingService private readonly keybindingService: IKeybindingService,
+		@IThemeService private readonly themeService: IThemeService
 	) {
 		super();
 	}
@@ -77,48 +83,52 @@ export class NativeDialogHandler extends AbstractDialogHandler {
 
 		const osProps = await this.nativeHostService.getOSProperties();
 
-		const detailString = (useAgo: boolean): string => {
-			// {{SQL CARBON EDIT}} - BEGIN - Removing Electron Build ID from detail string
-			/*
-			return localize({ key: 'aboutDetail', comment: ['Electron, Chromium, Node.js and V8 are product names that need no translation'] },
-				"Version: {0}\nCommit: {1}\nDate: {2}\nElectron: {3}\nElectronBuildId: {4}\nChromium: {5}\nNode.js: {6}\nV8: {7}\nOS: {8}",
-				version,
-				this.productService.commit || 'Unknown',
-				this.productService.date ? `${this.productService.date}${useAgo ? ' (' + fromNow(new Date(this.productService.date), true) + ')' : ''}` : 'Unknown',
-				process.versions['electron'],
-				process.versions['microsoft-build'],
-				process.versions['chrome'],
-				process.versions['node'],
-				process.versions['v8'],
-				`${osProps.type} ${osProps.arch} ${osProps.release}${isLinuxSnap ? ' snap' : ''}`,
-				this.productService.vscodeVersion  // {{SQL CARBON EDIT}} - add vscode version
-			);
-			*/
-			return aboutDetail(
-				version,
-				this.productService.commit || 'Unknown',
-				this.productService.date ? `${this.productService.date}${useAgo ? ' (' + fromNow(new Date(this.productService.date), true) + ')' : ''}` : 'Unknown',
-				process.versions['electron'],
-				process.versions['chrome'],
-				process.versions['node'],
-				process.versions['v8'],
-				`${osProps.type} ${osProps.arch} ${osProps.release}${isLinuxSnap ? ' snap' : ''}`,
-				this.productService.vscodeVersion  // {{SQL CARBON EDIT}} - add vscode version
-			);
-			// {{SQL CARBON EDIT}} - END - New localized string doesn't include Electron Build ID since it shows up as undefined
-		};
+		const osLabel = `${osProps.type} ${osProps.arch} ${osProps.release}${isLinuxSnap ? ' snap' : ''}`;
+		const detailRows: IBrandSurfaceEntry[] = [
+			{ label: 'Version', value: version || 'Unknown' },
+			{ label: 'Commit', value: this.productService.commit || 'Unknown' },
+			{ label: 'Date', value: this.productService.date || 'Unknown' },
+			{ label: 'VS Code', value: this.productService.vscodeVersion || 'Unknown' },
+			{ label: 'Electron', value: process.versions['electron'] || 'Unknown' },
+			{ label: 'Chromium', value: process.versions['chrome'] || 'Unknown' },
+			{ label: 'Node.js', value: process.versions['node'] || 'Unknown' },
+			{ label: 'V8', value: process.versions['v8'] || 'Unknown' },
+			{ label: 'OS', value: osLabel }
+		];
+		const shortCommit = detailRows[1].value === 'Unknown' ? 'Unknown' : detailRows[1].value.slice(0, 10);
+		const detailToCopy = aboutDetail(
+			version || 'Unknown',
+			this.productService.commit || 'Unknown',
+			this.productService.date || 'Unknown',
+			process.versions['electron'] || 'Unknown',
+			process.versions['chrome'] || 'Unknown',
+			process.versions['node'] || 'Unknown',
+			process.versions['v8'] || 'Unknown',
+			osLabel,
+			this.productService.vscodeVersion || 'Unknown'
+		);
 
-		const detail = detailString(true);
-		const detailToCopy = detailString(false);
-
-		const { response } = await this.nativeHostService.showMessageBox({
-			type: 'info',
-			message: this.productService.nameLong,
-			detail: `\n${detail}`,
+		const response = await showBrandDialog({
+			layoutService: this.layoutService,
+			keybindingService: this.keybindingService,
+			theme: this.themeService.getColorTheme(),
+			title: localize('aboutTitle', "About {0}", this.productService.nameLong),
 			buttons: [
 				localize({ key: 'copy', comment: ['&& denotes a mnemonic'] }, "&&Copy"),
-				localize('okButton', "OK")
-			]
+				localize('close', "Close")
+			],
+			cancelId: 1,
+			surface: {
+				eyebrow: 'DATA PLATFORM WORKBENCH',
+				title: this.productService.nameLong,
+				subtitle: `Version ${detailRows[0].value} • Commit ${shortCommit}`,
+				chips: [
+					{ label: 'Version', value: detailRows[0].value },
+					{ label: 'Commit', value: shortCommit },
+					{ label: 'VS Code', value: detailRows[3].value }
+				],
+				entries: detailRows
+			}
 		});
 
 		if (response === 0) {

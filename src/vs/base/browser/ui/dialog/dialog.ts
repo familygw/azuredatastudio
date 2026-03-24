@@ -28,6 +28,7 @@ export interface IDialogInputOptions {
 export interface IDialogOptions {
 	readonly cancelId?: number;
 	readonly detail?: string;
+	readonly classes?: string[];
 	readonly checkboxLabel?: string;
 	readonly checkboxChecked?: boolean;
 	readonly type?: 'none' | 'info' | 'error' | 'question' | 'warning' | 'pending';
@@ -90,6 +91,9 @@ export class Dialog extends Disposable {
 		this.element = this.shadowElement.appendChild($('.monaco-dialog-box'));
 		this.element.setAttribute('role', 'dialog');
 		this.element.tabIndex = -1;
+		if (this.options.classes?.length) {
+			this.element.classList.add(...this.options.classes);
+		}
 		hide(this.element);
 
 		this.buttonStyles = options.buttonStyles;

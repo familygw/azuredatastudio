@@ -15,11 +15,12 @@ import { EventHelper } from 'vs/base/browser/dom';
 import { IKeybindingService } from 'vs/platform/keybinding/common/keybinding';
 import { IProductService } from 'vs/platform/product/common/productService';
 import { IClipboardService } from 'vs/platform/clipboard/common/clipboardService';
-import { fromNow } from 'vs/base/common/date';
 import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
 import { MarkdownRenderer } from 'vs/editor/contrib/markdownRenderer/browser/markdownRenderer';
 import { defaultButtonStyles, defaultCheckboxStyles, defaultDialogStyles, defaultInputBoxStyles } from 'vs/platform/theme/browser/defaultStyles';
 import { ResultKind } from 'vs/platform/keybinding/common/keybindingResolver';
+import { IThemeService } from 'vs/platform/theme/common/themeService';
+import { IBrandSurfaceEntry, showBrandDialog } from 'vs/workbench/browser/parts/dialogs/aboutSplash';
 
 export class BrowserDialogHandler extends AbstractDialogHandler {
 
@@ -40,7 +41,8 @@ export class BrowserDialogHandler extends AbstractDialogHandler {
 		@IKeybindingService private readonly keybindingService: IKeybindingService,
 		@IInstantiationService private readonly instantiationService: IInstantiationService,
 		@IProductService private readonly productService: IProductService,
-		@IClipboardService private readonly clipboardService: IClipboardService
+		@IClipboardService private readonly clipboardService: IClipboardService,
+		@IThemeService private readonly themeService: IThemeService
 	) {
 		super();
 	}
@@ -76,29 +78,38 @@ export class BrowserDialogHandler extends AbstractDialogHandler {
 	}
 
 	async about(): Promise<void> {
-		const detailString = (useAgo: boolean): string => {
-			return localize('aboutDetail',
-				"Version: {0}\nCommit: {1}\nDate: {2}\nBrowser: {3}",
-				this.productService.version || 'Unknown',
-				this.productService.commit || 'Unknown',
-				this.productService.date ? `${this.productService.date}${useAgo ? ' (' + fromNow(new Date(this.productService.date), true) + ')' : ''}` : 'Unknown',
-				navigator.userAgent
-			);
-		};
+		const detailRows: IBrandSurfaceEntry[] = [
+			{ label: 'Version', value: this.productService.version || 'Unknown' },
+			{ label: 'Commit', value: this.productService.commit || 'Unknown' },
+			{ label: 'Date', value: this.productService.date || 'Unknown' },
+			{ label: 'VS Code', value: this.productService.vscodeVersion || 'Unknown' },
+			{ label: 'Browser', value: navigator.userAgent }
+		];
+		const shortCommit = detailRows[1].value === 'Unknown' ? 'Unknown' : detailRows[1].value.slice(0, 10);
+		const detailToCopy = detailRows.map(row => `${row.label}: ${row.value}`).join('\n');
 
-		const detail = detailString(true);
-		const detailToCopy = detailString(false);
-
-		const { button } = await this.doShow(
-			Severity.Info,
-			this.productService.nameLong,
-			[
+		const button = await showBrandDialog({
+			layoutService: this.layoutService,
+			keybindingService: this.keybindingService,
+			theme: this.themeService.getColorTheme(),
+			title: localize('aboutTitle', "About {0}", this.productService.nameLong),
+			buttons: [
 				localize({ key: 'copy', comment: ['&& denotes a mnemonic'] }, "&&Copy"),
-				localize('ok', "OK")
+				localize('close', "Close")
 			],
-			detail,
-			1
-		);
+			cancelId: 1,
+			surface: {
+				eyebrow: 'DATA PLATFORM WORKBENCH',
+				title: this.productService.nameLong,
+				subtitle: `Version ${detailRows[0].value} • Commit ${shortCommit}`,
+				chips: [
+					{ label: 'Version', value: detailRows[0].value },
+					{ label: 'Commit', value: shortCommit },
+					{ label: 'VS Code', value: detailRows[3].value }
+				],
+				entries: detailRows
+			}
+		});
 
 		if (button === 0) {
 			this.clipboardService.writeText(detailToCopy);

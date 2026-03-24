@@ -12,6 +12,7 @@ import { ILogService } from 'vs/platform/log/common/log';
 import { INativeHostService } from 'vs/platform/native/common/native';
 import { IProductService } from 'vs/platform/product/common/productService';
 import { Registry } from 'vs/platform/registry/common/platform';
+import { IThemeService } from 'vs/platform/theme/common/themeService';
 import { IWorkbenchContribution, IWorkbenchContributionsRegistry, Extensions as WorkbenchExtensions } from 'vs/workbench/common/contributions';
 import { IDialogsModel, IDialogViewItem } from 'vs/workbench/common/dialogs';
 import { BrowserDialogHandler } from 'vs/workbench/browser/parts/dialogs/dialogHandler';
@@ -37,12 +38,13 @@ export class DialogHandlerContribution extends Disposable implements IWorkbenchC
 		@IInstantiationService instantiationService: IInstantiationService,
 		@IProductService productService: IProductService,
 		@IClipboardService clipboardService: IClipboardService,
-		@INativeHostService nativeHostService: INativeHostService
+		@INativeHostService nativeHostService: INativeHostService,
+		@IThemeService themeService: IThemeService
 	) {
 		super();
 
-		this.browserImpl = new BrowserDialogHandler(logService, layoutService, keybindingService, instantiationService, productService, clipboardService);
-		this.nativeImpl = new NativeDialogHandler(logService, nativeHostService, productService, clipboardService);
+		this.browserImpl = new BrowserDialogHandler(logService, layoutService, keybindingService, instantiationService, productService, clipboardService, themeService);
+		this.nativeImpl = new NativeDialogHandler(logService, nativeHostService, productService, clipboardService, layoutService, keybindingService, themeService);
 
 		this.model = (this.dialogService as DialogService).model;
 
