@@ -2,8 +2,9 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-define(['require', 'exports'], function (require) {
+define(['require', 'exports', 'vs/base/common/network'], function (require, exports, network) {
 	const jquerylib = require.__$__nodeRequire('jquery');
+	const { FileAccess } = network;
 
 	window['jQuery'] = jquerylib;
 	window['$'] = jquerylib;
@@ -20,7 +21,6 @@ define(['require', 'exports'], function (require) {
 	require.__$__nodeRequire('reflect-metadata');
 	require.__$__nodeRequire('chart.js');
 	const fs = require.__$__nodeRequire('fs');
-	const path = require.__$__nodeRequire('path');
 	// VS Code uses an AMD loader for its own files (and ours) but Node.JS normally uses commonjs. For modules that
 	// support UMD this may cause some issues since it will appear to them that AMD exists and so depending on the order
 	// they check support for the two types they may end up using either commonjs or AMD. If commonjs is first this is
@@ -31,7 +31,7 @@ define(['require', 'exports'], function (require) {
 	// Even `__$__nodeRequire` runs in the renderer context, so the VS Code loader can still intercept the anonymous
 	// define call. Evaluate the bundle with a local `define` parameter set to `undefined` to force the non-AMD path.
 	function loadNonAmdBundle(moduleName) {
-		const bundlePath = path.join(process.cwd(), 'node_modules', ...moduleName.split('/')) + '.js';
+		const bundlePath = FileAccess.asFileUri(`vs/../../node_modules/${moduleName}.js`).fsPath;
 		const bundleSource = fs.readFileSync(bundlePath, 'utf8').replace(
 			/typeof define === 'function' && define\.amd \? define\(factory\) :\s*factory\(\);/,
 			'factory();'
