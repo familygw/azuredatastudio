@@ -2,9 +2,9 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-define(['require', 'exports', 'vs/base/common/network'], function (require, exports, network) {
+define(['require', 'exports'], function (require, exports) {
 	const jquerylib = require.__$__nodeRequire('jquery');
-	const { FileAccess } = network;
+	const path = require.__$__nodeRequire('path');
 
 	window['jQuery'] = jquerylib;
 	window['$'] = jquerylib;
@@ -30,8 +30,17 @@ define(['require', 'exports', 'vs/base/common/network'], function (require, expo
 	// zone.js v0.11+ still ships UMD bundles under `dist/`, but those wrappers prefer AMD when `define.amd` exists.
 	// Even `__$__nodeRequire` runs in the renderer context, so the VS Code loader can still intercept the anonymous
 	// define call. Evaluate the bundle with a local `define` parameter set to `undefined` to force the non-AMD path.
+	function getAppRoot() {
+		const appPathArg = process.argv.find(arg => arg.startsWith('--app-path='));
+		return appPathArg ? appPathArg.substring('--app-path='.length) : process.cwd();
+	}
+
 	function loadNonAmdBundle(moduleName) {
-		const bundlePath = FileAccess.asFileUri(`vs/../../node_modules/${moduleName}.js`).fsPath;
+		const appRoot = getAppRoot();
+		const bundlePathSegments = moduleName.split('/');
+		const unpackedBundlePath = path.join(appRoot, 'node_modules', ...bundlePathSegments) + '.js';
+		const packedBundlePath = path.join(appRoot, 'node_modules.asar', ...bundlePathSegments) + '.js';
+		const bundlePath = fs.existsSync(unpackedBundlePath) ? unpackedBundlePath : packedBundlePath;
 		const bundleSource = fs.readFileSync(bundlePath, 'utf8').replace(
 			/typeof define === 'function' && define\.amd \? define\(factory\) :\s*factory\(\);/,
 			'factory();'

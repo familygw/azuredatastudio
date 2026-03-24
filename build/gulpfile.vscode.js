@@ -436,6 +436,31 @@ function packageTask(platform, arch, sourceFolderName, destinationFolderName, op
 	};
 }
 
+function adHocSignDarwinAppTask(destinationFolderName) {
+	const destination = path.join(path.dirname(root), destinationFolderName);
+	const appPath = path.join(destination, `${product.nameLong}.app`);
+
+	return async () => {
+		if (process.platform !== 'darwin' || process.env['TF_BUILD']) {
+			return;
+		}
+
+		if (!fs.existsSync(appPath)) {
+			throw new Error(`Missing packaged app to sign: ${appPath}`);
+		}
+
+		const signResult = cp.spawnSync('codesign', ['--force', '--deep', '--sign', '-', appPath], { stdio: 'inherit' });
+		if (signResult.status !== 0) {
+			throw new Error(`Ad-hoc signing failed for ${appPath}`);
+		}
+
+		const verifyResult = cp.spawnSync('codesign', ['--verify', '--deep', '--strict', appPath], { stdio: 'inherit' });
+		if (verifyResult.status !== 0) {
+			throw new Error(`Ad-hoc signature verification failed for ${appPath}`);
+		}
+	};
+}
+
 function patchWin32DependenciesTask(destinationFolderName) {
 	const cwd = path.join(path.dirname(root), destinationFolderName);
 
@@ -514,6 +539,10 @@ BUILD_TARGETS.forEach(buildTarget => {
 			util.rimraf(path.join(buildRoot, destinationFolderName)),
 			packageTask(platform, arch, sourceFolderName, destinationFolderName, opts)
 		];
+
+		if (platform === 'darwin') {
+			tasks.push(adHocSignDarwinAppTask(destinationFolderName));
+		}
 
 		if (platform === 'win32') {
 			tasks.push(patchWin32DependenciesTask(destinationFolderName));
@@ -711,4 +740,3 @@ gulp.task(task.define(
 		}
 	)
 ));
-
