@@ -153,6 +153,7 @@
     "@types/kerberos": "^1.1.2",
     "@types/keytar": "^4.4.0",
     "@types/mark.js": "^8.11.8",
+    "@types/minimatch": "^3.0.3",
     "@types/minimist": "^1.2.1",
     "@types/mocha": "^9.1.1",
     "@types/node": "20.x",
@@ -278,6 +279,7 @@
   "resolutions": {
     "@babel/helpers": "^7.26.10",
     "@babel/traverse": "^7.23.2",
+    "@types/minimatch": "3.0.3",
     "applicationinsights/continuation-local-storage/async-listener/semver": "5.7.2",
     "applicationinsights/diagnostic-channel/semver": "5.7.2",
     "eslint/file-entry-cache/flat-cache/flatted": "^3.4.2",
