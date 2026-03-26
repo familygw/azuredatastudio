@@ -244,19 +244,22 @@ suite('SQL ConnectionStatusManager tests', () => {
 		assert.strictEqual(connectionStatus, connection2Id);
 	});
 
-	test('getActiveConnectionProfiles should return a list of all the unique connections that the status manager knows about', () => {
+	test('getActiveConnectionProfiles should keep editor connections distinct from shared profile connections', () => {
 		// Add duplicate connections
 		let newConnection = Object.assign({}, connectionProfile);
 		newConnection.id = 'test_id';
 		newConnection.serverName = 'new_server_name';
 		newConnection.options['databaseDisplayName'] = newConnection.databaseName;
-		connections.addConnection(newConnection, 'test_uri_1');
-		connections.addConnection(newConnection, 'test_uri_2');
+		// Duplicate connection/dashboard URIs should still share the same profile identity.
+		connections.addConnection(newConnection, 'connection:test_uri_1');
+		connections.addConnection(newConnection, 'dashboard:test_uri_1');
+		// Query editor URIs need their own active profile identity.
+		connections.addConnection(newConnection, 'untitled:TestQuery1');
 		newConnection = new ConnectionProfile(capabilitiesService, newConnection);
 
-		// Get the connections and verify that the duplicate is only returned once
+		// Get the connections and verify that the base connection is deduplicated but the editor copy remains distinct.
 		let activeConnections = connections.getActiveConnectionProfiles();
-		assert.strictEqual(activeConnections.length, 4);
-		assert.strictEqual(activeConnections.filter(connection => connection.matches(newConnection)).length, 1, 'Did not find newConnection in active connections');
+		assert.strictEqual(activeConnections.length, 5);
+		assert.strictEqual(activeConnections.filter(connection => connection.matches(newConnection)).length, 2, 'Did not find distinct editor connection in active connections');
 	});
 });

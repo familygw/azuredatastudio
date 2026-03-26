@@ -1584,6 +1584,37 @@ suite('SQL ConnectionManagementService tests', () => {
 		assert.strictEqual(newDbName, connectionManagementService.getConnectionProfile(ownerUri).databaseName);
 	});
 
+	test('list and change database use the original owner uri when the connected uri includes a database name', async () => {
+		let dbName = 'master';
+		let newDbName = 'renamed_master';
+		let aliasedOwnerUri = 'connection:test_server:master';
+		let originalOwnerUri = 'connection:test_server';
+		let aliasedConnectionProfile = <IConnectionProfile>{ databaseName: dbName, providerName: 'MSSQL' };
+		let connectionStatusManagerStub = sinon.stub((connectionManagementService as any)._connectionStatusManager, 'getOriginalOwnerUri').returns(originalOwnerUri);
+		let refreshTokenStub = sinon.stub(connectionManagementService, 'refreshAzureAccountTokenIfNecessary').returns(Promise.resolve(true));
+		let isConnectedStub = sinon.stub(connectionManagementService, 'isConnected');
+		isConnectedStub.withArgs(aliasedOwnerUri).returns(true);
+		let providerIdStub = sinon.stub(connectionManagementService, 'getProviderIdFromUri').returns('MSSQL');
+		let connectionProfileStub = sinon.stub(connectionManagementService, 'getConnectionProfile');
+		connectionProfileStub.withArgs(aliasedOwnerUri).returns(aliasedConnectionProfile);
+		try {
+			mssqlConnectionProvider.setup(x => x.listDatabases(originalOwnerUri)).returns(() => Promise.resolve({ databaseNames: [dbName] }));
+			mssqlConnectionProvider.setup(x => x.changeDatabase(originalOwnerUri, newDbName)).returns(() => Promise.resolve(true));
+			let listDatabasesResult = await connectionManagementService.listDatabases(aliasedOwnerUri);
+			assert.strictEqual(listDatabasesResult.databaseNames.length, 1);
+			assert.strictEqual(listDatabasesResult.databaseNames[0], dbName);
+			let changeDatabaseResults = await connectionManagementService.changeDatabase(aliasedOwnerUri, newDbName);
+			assert(changeDatabaseResults);
+			assert.strictEqual(newDbName, aliasedConnectionProfile.databaseName);
+		} finally {
+			connectionStatusManagerStub.restore();
+			refreshTokenStub.restore();
+			isConnectedStub.restore();
+			providerIdStub.restore();
+			connectionProfileStub.restore();
+		}
+	});
+
 	test('list and change database tests for invalid uris', async () => {
 		let badString = 'bad_string';
 		let listDatabasesResult = await connectionManagementService.listDatabases(badString);

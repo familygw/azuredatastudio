@@ -14,6 +14,7 @@ import * as azdata from 'azdata';
 import * as nls from 'vs/nls';
 import { values } from 'vs/base/common/collections';
 import { Schemas } from 'vs/base/common/network';
+import { generateUuid } from 'vs/base/common/uuid';
 
 export class ConnectionStatusManager {
 
@@ -85,6 +86,13 @@ export class ConnectionStatusManager {
 
 	public addConnection(connection: IConnectionProfile, id: string): ConnectionManagementInfo {
 		this._logService.info(`Adding connection ${id}`);
+
+		// Query editors need their own active profile identity so profile-id lookups don't resolve back to a
+		// different connection after the editor changes databases.
+		if (this.isEditorTypeUri(id) && connection.id && this.findConnectionByProfileId(connection.id) !== undefined) {
+			connection.id = generateUuid();
+		}
+
 		// Always create a copy and save that in the list
 		let connectionProfile = new ConnectionProfile(this._capabilitiesService, connection);
 		let connectionInfo: ConnectionManagementInfo = {

@@ -548,6 +548,34 @@ suite('SQL QueryAction Tests', () => {
 		assert.strictEqual(listItem.currentDatabaseName, eventParams.connectionProfile.databaseName);
 	});
 
+	test('ListDatabaseItem - does not send duplicate change database requests while one is in progress', async () => {
+		let databaseName = 'master';
+		let changeDatabaseCallCount = 0;
+		let resolveChangeDatabase: (value: boolean) => void;
+		const changeDatabasePromise = new Promise<boolean>(resolve => {
+			resolveChangeDatabase = resolve;
+		});
+
+		connectionManagementService.setup(x => x.onConnectionChanged).returns(() => Event.None);
+		connectionManagementService.setup(x => x.getServerInfo(TypeMoq.It.isAny())).returns(() => <ServerInfo>{ serverMajorVersion: 12, serverEdition: 'Test' });
+		connectionManagementService.setup(x => x.getConnectionProfile(TypeMoq.It.isAny())).returns(() => <IConnectionProfile>{ databaseName: databaseName, providerName: mssqlProviderName });
+		connectionManagementService.setup(x => x.changeDatabase(TypeMoq.It.isAnyString(), TypeMoq.It.isAnyString())).returns(() => {
+			changeDatabaseCallCount++;
+			return changeDatabasePromise;
+		});
+
+		let listItem = new ListDatabasesActionItem(editor.object, undefined, undefined, connectionManagementService.object, undefined, undefined, capabilitiesService);
+		listItem.onConnected();
+
+		(listItem as any).databaseSelected('tempdb');
+		(listItem as any).databaseSelected('tempdb');
+
+		assert.strictEqual(changeDatabaseCallCount, 1, 'Expected only one changeDatabase request while the first one is still in progress');
+
+		resolveChangeDatabase!(true);
+		await changeDatabasePromise;
+	});
+
 	test('runCurrent - opens connection dialog when there are no active connections', async () => {
 		// setting up environment
 		let isConnected = false;

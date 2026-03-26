@@ -238,7 +238,7 @@ import product from 'vs/platform/product/common/product'; // {{SQL CARBON EDIT}}
 			},
 			'window.experimental.nativeContextMenuLocation': { // TODO@bpasero remove me eventually
 				'type': 'boolean',
-				'default': true,
+				'default': false,
 				'scope': ConfigurationScope.APPLICATION,
 				'description': localize('nativeContextMenuLocation', "Let the OS handle positioning of the context menu in cases where it should appear under the mouse.")
 			},

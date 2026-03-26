@@ -1637,14 +1637,16 @@ export class ConnectionManagementService extends Disposable implements IConnecti
 	}
 
 	public async listDatabases(connectionUri: string): Promise<azdata.ListDatabasesResult | undefined> {
-		await this.refreshAzureAccountTokenIfNecessary(connectionUri);
+		let ownerUri = this._connectionStatusManager.getOriginalOwnerUri(connectionUri);
+		await this.refreshAzureAccountTokenIfNecessary(ownerUri);
 		if (this.isConnected(connectionUri)) {
-			return this.sendListDatabasesRequest(connectionUri);
+			return this.sendListDatabasesRequest(ownerUri);
 		}
 		return Promise.resolve(undefined);
 	}
 
 	public changeDatabase(connectionUri: string, databaseName: string): Thenable<boolean> {
+		let ownerUri = this._connectionStatusManager.getOriginalOwnerUri(connectionUri);
 		if (this.isConnected(connectionUri)) {
 			let providerId: string = this.getProviderIdFromUri(connectionUri);
 			if (!providerId) {
@@ -1652,7 +1654,7 @@ export class ConnectionManagementService extends Disposable implements IConnecti
 			}
 
 			return this._providers.get(providerId).onReady.then(provider => {
-				return provider.changeDatabase(connectionUri, databaseName).then(result => {
+				return provider.changeDatabase(ownerUri, databaseName).then(result => {
 					if (result) {
 						this.getConnectionProfile(connectionUri).databaseName = databaseName;
 					}

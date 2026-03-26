@@ -17,11 +17,41 @@ interface IPackageInfo {
 	aiKey: string;
 }
 
+interface ITelemetryErrorEvent {
+	withAdditionalProperties(properties: { [key: string]: string }): ITelemetryErrorEvent;
+	send(): void;
+}
+
+interface ITelemetryReporter {
+	sendTelemetryEvent(eventName: string, properties?: { [key: string]: string }, measures?: { [key: string]: number }): void;
+	sendActionEvent(viewName: string, actionName: string): void;
+	sendMetricsEvent(measures: { [key: string]: number }, eventName: string): void;
+	createErrorEvent2(viewName: string, actionName: string, error: unknown): ITelemetryErrorEvent;
+	dispose(): void;
+}
+
 const localize = nls.loadMessageBundle();
 const viewKnownIssuesAction = localize('viewKnownIssuesText', "View Known Issues");
+const restartExtensionHostAction = localize('restartExtensionHost', "Restart Extension Host");
+const reloadWindowAction = localize('reloadWindow', "Reload Window");
 
 const packageInfo = vscode.extensions.getExtension(Constants.packageName)?.packageJSON as IPackageInfo | undefined;
-export const TelemetryReporter = new AdsTelemetryReporter<string, string>(packageInfo?.name, packageInfo?.version, packageInfo?.aiKey);
+const noOpErrorEvent: ITelemetryErrorEvent = {
+	withAdditionalProperties: () => noOpErrorEvent,
+	send: () => { }
+};
+
+const noOpTelemetryReporter: ITelemetryReporter = {
+	sendTelemetryEvent: () => { },
+	sendActionEvent: () => { },
+	sendMetricsEvent: () => { },
+	createErrorEvent2: () => noOpErrorEvent,
+	dispose: () => { }
+};
+
+export const TelemetryReporter: ITelemetryReporter = vscode.env.isTelemetryEnabled && packageInfo?.aiKey
+	? new AdsTelemetryReporter<string, string>(packageInfo.name, packageInfo.version, packageInfo.aiKey)
+	: noOpTelemetryReporter;
 
 /**
  * Collects server information from ServerInfo to put into a
@@ -48,9 +78,19 @@ export class LanguageClientErrorHandler implements ErrorHandler {
 		TelemetryReporter.sendTelemetryEvent(Constants.serviceName + 'Crash');
 		void vscode.window.showErrorMessage(
 			localize('serviceCrashMessage', "{0} component exited unexpectedly. Please restart Azure Data Studio.", Constants.serviceName),
+			restartExtensionHostAction,
+			reloadWindowAction,
 			viewKnownIssuesAction).then(action => {
-				if (action && action === viewKnownIssuesAction) {
-					void vscode.env.openExternal(vscode.Uri.parse(Constants.serviceCrashLink));
+				switch (action) {
+					case restartExtensionHostAction:
+						void vscode.commands.executeCommand('workbench.action.restartExtensionHost');
+						break;
+					case reloadWindowAction:
+						void vscode.commands.executeCommand('workbench.action.reloadWindow');
+						break;
+					case viewKnownIssuesAction:
+						void vscode.env.openExternal(vscode.Uri.parse(Constants.serviceCrashLink));
+						break;
 				}
 			});
 	}

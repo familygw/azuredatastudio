@@ -634,6 +634,7 @@ export class ListDatabasesActionItem extends Disposable implements IActionViewIt
 	public actionRunner: IActionRunner;
 	private _currentDatabaseName: string;
 	private _isConnected: boolean;
+	private _databaseChangeInProgress: boolean = false;
 	private _databaseListDropdown: HTMLElement;
 	private _dropdown: Dropdown;
 	private readonly _selectDatabaseString: string = nls.localize("selectDatabase", "Select Database");
@@ -703,7 +704,7 @@ export class ListDatabasesActionItem extends Disposable implements IActionViewIt
 	private databaseSelected(dbName: string): void {
 		// If dbName is blank (this can happen for example when setting the box value to empty when disconnecting)
 		// then just no-op, there's nothing we can do.
-		if (!dbName) {
+		if (!dbName || this._databaseChangeInProgress) {
 			return;
 		}
 
@@ -726,7 +727,10 @@ export class ListDatabasesActionItem extends Disposable implements IActionViewIt
 			return;
 		}
 
-		this.connectionManagementService.changeDatabase(this._editor.input.uri, dbName)
+		this._databaseChangeInProgress = true;
+		this._dropdown.enabled = false;
+		const changeDatabasePromise = this.connectionManagementService.changeDatabase(this._editor.input.uri, dbName);
+		changeDatabasePromise
 			.then(
 				result => {
 					if (!result) {
@@ -745,7 +749,11 @@ export class ListDatabasesActionItem extends Disposable implements IActionViewIt
 						severity: Severity.Error,
 						message: nls.localize('changeDatabase.failedWithError', "Failed to change database: {0}", getErrorMessage(error))
 					});
-				});
+				})
+			.then(() => {
+				this._databaseChangeInProgress = false;
+				this._dropdown.enabled = !!this._isConnected;
+			});
 	}
 
 	/**
