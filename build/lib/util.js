@@ -316,27 +316,8 @@ function versionStringToNumber(versionStr) {
 exports.versionStringToNumber = versionStringToNumber;
 function streamToPromise(stream) {
     return new Promise((c, e) => {
-        // Pending promises do not keep the event loop alive. Gulp-cli listens to
-        // `beforeExit` and reports "Did you forget to signal async completion?"
-        // when Electron download finishes from cache before yauzl/vfs I/O is scheduled.
-        const keepAlive = setInterval(() => { }, 1000);
-        let settled = false;
-        const settle = (err) => {
-            if (settled) {
-                return;
-            }
-            settled = true;
-            clearInterval(keepAlive);
-            if (err) {
-                e(err);
-            }
-            else {
-                c();
-            }
-        };
-        stream.once('error', settle);
-        stream.once('end', () => settle());
-        stream.once('finish', () => settle());
+        stream.on('error', err => e(err));
+        stream.on('end', () => c());
     });
 }
 exports.streamToPromise = streamToPromise;

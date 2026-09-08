@@ -291,7 +291,20 @@ function packageTask(platform, arch, sourceFolderName, destinationFolderName, op
 			const set = new Set(ext.platforms);
 			return !set.has(platform);
 		}).map(ext => `!.build/extensions/${ext.name}/**`);
-		const extensions = gulp.src(['.build/extensions/**', ...platformSpecificBuiltInExtensionsExclusions, '!.build/extensions/node_modules/**'], { base: '.build', dot: true }); // {{SQL CARBON EDIT}} - don't package the node_modules directory
+		// {{SQL CARBON EDIT}} SqlToolsService is downloaded per-runtime under sqltoolsservice/<platform>/.
+		// vsce/gulp otherwise ship every folder present (OSX + OSX_ARM64 on macOS ~600MB).
+		// Keep only the runtime that matches this package; universal copies both back in create-universal-app.ts.
+		const sqlToolsServiceExclusions = [];
+		if (platform === 'darwin') {
+			sqlToolsServiceExclusions.push(
+				arch === 'arm64'
+					? '!.build/extensions/**/sqltoolsservice/OSX/**'
+					: '!.build/extensions/**/sqltoolsservice/OSX_ARM64/**',
+				'!.build/extensions/**/sqltoolsservice/Windows*/**',
+				'!.build/extensions/**/sqltoolsservice/Linux/**'
+			);
+		}
+		const extensions = gulp.src(['.build/extensions/**', ...platformSpecificBuiltInExtensionsExclusions, ...sqlToolsServiceExclusions, '!.build/extensions/node_modules/**'], { base: '.build', dot: true }); // {{SQL CARBON EDIT}} - don't package the node_modules directory
 
 		const sources = es.merge(src, extensions)
 			.pipe(filter(['**', '!**/*.js.map'], { dot: true }));
@@ -434,7 +447,7 @@ function packageTask(platform, arch, sourceFolderName, destinationFolderName, op
 				.pipe(rename('bin/' + product.applicationName)));
 		}
 
-		return util.streamToPromise(result.pipe(vfs.dest(destination)));
+		return result.pipe(vfs.dest(destination));
 	};
 }
 

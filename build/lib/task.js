@@ -54,24 +54,8 @@ async function _doExecute(task) {
             return;
         }
         // this is a stream returning task
-        const keepAlive = setInterval(() => { }, 1000);
-        let settled = false;
-        const settle = (err) => {
-            if (settled) {
-                return;
-            }
-            settled = true;
-            clearInterval(keepAlive);
-            if (err) {
-                reject(err);
-            }
-            else {
-                resolve();
-            }
-        };
-        taskResult.once('end', () => settle());
-        taskResult.once('finish', () => settle());
-        taskResult.once('error', settle);
+        taskResult.on('end', _ => resolve());
+        taskResult.on('error', err => reject(err));
     });
 }
 function series(...tasks) {

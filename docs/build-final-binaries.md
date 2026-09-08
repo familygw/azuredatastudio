@@ -11,17 +11,24 @@ The authoritative tasks live in:
 
 ## Before you start
 
-From the repository root:
+Packaging (`yarn gulp vscode-*-min`) needs **Node.js 20** for that gulp process only. Node 22+ (especially Node 26) can hang after `Downloading electron: 100%`. You do **not** need to change your default Node or export `PATH` in the shell.
+
+One-time: install a side-by-side Node 20 (`brew install node@20`). Then:
 
 ```bash
-yarn
+yarn gulp-package
+# or
+./scripts/gulp-package.sh vscode-darwin-arm64-min
 ```
+
+The helper prepends Node 20 only for that child process. `yarn` / `node -v` in your terminal stay as they are.
 
 Useful notes:
 
 - `yarn gulp --tasks` prints the available gulp tasks.
-- `yarn gulp vscode-<platform>-<arch>-min` is the recommended one-step release-style build. It runs `compile-build`, `compile-extensions-build`, `minify-vscode`, and then packages the app.
-- `yarn gulp vscode-<platform>-<arch>-min-ci` only packages an already prepared build. Use it only when `out-build/`, `.build/extensions/`, and `out-vscode-min/` already exist.
+- `yarn gulp-package` (or `./scripts/gulp-package.sh`) runs packaging with Node 20 without changing your shell PATH. Default task matches the current OS/arch.
+- `yarn gulp vscode-<platform>-<arch>-min` is the one-step release-style build, but it uses whatever `node` is first on PATH. Prefer `yarn gulp-package` if your default Node is 22+.
+- `yarn gulp vscode-<platform>-<arch>-min-ci` only packages an already prepared build. Use it only when `out-build/`, `.build/extensions/`, and `out-vscode-min/` already exist. Pass that task to the helper: `yarn gulp-package vscode-darwin-arm64-min-ci`.
 - The packaged application folders are written one level above the repository root, for example `../azuredatastudio-linux-x64` or `../azuredatastudio-win32-x64`.
 - Platform-specific installers and packages are written under `.build/`.
 
@@ -99,16 +106,16 @@ Replace `x64` with `armhf` or `arm64` when building those package variants. Linu
 
 ## macOS
 
-Build an unsigned packaged app for one architecture:
+Build an unsigned packaged app for one architecture. Prefer the helper so packaging uses Node 20:
 
 ```bash
-yarn gulp vscode-darwin-x64-min
-```
+# Apple Silicon (default task on darwin-arm64)
+yarn gulp-package
+# or
+./scripts/gulp-package.sh vscode-darwin-arm64-min
 
-or:
-
-```bash
-yarn gulp vscode-darwin-arm64-min
+# Intel
+./scripts/gulp-package.sh vscode-darwin-x64-min
 ```
 
 Outputs:
@@ -117,6 +124,8 @@ Outputs:
 ../azuredatastudio-darwin-x64/Azure Data Studio.app
 ../azuredatastudio-darwin-arm64/Azure Data Studio.app
 ```
+
+`vscode-darwin-arm64-min` is **not** a universal/fat Electron app. Electron and helpers are arm64-only. The large size is mostly `extensions/mssql/sqltoolsservice`. Packaging keeps only `OSX_ARM64` for arm64 and only `OSX` for x64 (~300MB saved vs shipping both). A universal app still needs both architectures (see below).
 
 ### Universal macOS app
 
