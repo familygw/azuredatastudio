@@ -328,7 +328,9 @@ function packageTask(platform, arch, sourceFolderName, destinationFolderName, op
 		// {{SQL CARBON EDIT}}
 		const dataApi = gulp.src('src/sql/azdata.d.ts').pipe(rename('out/sql/azdata.d.ts'));
 
-		const telemetry = gulp.src('.build/telemetry/**', { base: '.build/telemetry', dot: true });
+		const telemetry = fs.existsSync(path.join(__dirname, '..', '.build', 'telemetry'))
+			? gulp.src('.build/telemetry/**', { base: '.build/telemetry', dot: true })
+			: es.readArray([]);
 
 		const jsFilter = util.filter(data => !data.isDirectory() && /\.js$/.test(data.path));
 		const root = path.resolve(path.join(__dirname, '..'));
@@ -432,7 +434,7 @@ function packageTask(platform, arch, sourceFolderName, destinationFolderName, op
 				.pipe(rename('bin/' + product.applicationName)));
 		}
 
-		return result.pipe(vfs.dest(destination));
+		return util.streamToPromise(result.pipe(vfs.dest(destination)));
 	};
 }
 

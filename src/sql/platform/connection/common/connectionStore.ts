@@ -110,7 +110,9 @@ export class ConnectionStore {
 					}
 					return { profile: credentialsItem, savedCred: !!savedCred };
 				});
-		} else if (credentialsItem.authenticationType === AuthenticationType.AzureMFA || credentialsItem.authenticationType === AuthenticationType.DSTSAuth && credentialsItem.azureAccount) {
+		} else if (credentialsItem.authenticationType === AuthenticationType.AzureMFA
+			|| credentialsItem.authenticationType === AuthenticationType.ActiveDirectoryDefault
+			|| credentialsItem.authenticationType === AuthenticationType.DSTSAuth && credentialsItem.azureAccount) {
 			return Promise.resolve({ profile: credentialsItem, savedCred: true });
 		} else if (credentialsItem.authenticationType === AuthenticationType.None) {
 			// Kusto supports no authentication

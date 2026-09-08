@@ -2,14 +2,19 @@
 
 ## Unreleased
 
+### Features
+
+- Version bump to **1.54.2**.
+- MSSQL connections: added **Microsoft Entra ID - Default** authentication. SqlClient uses DefaultAzureCredential (Azure CLI, environment variables, managed identity, etc.). An optional email/user can be specified; no Azure account picker is required.
+
 ### Documentation
 
 - Added contributor instructions for building the final local binaries and platform packages for Linux, macOS, and Windows.
 
 ## January 2025 Hotfix
- 
+
 Azure Data Studio 1.51.1 is the latest general availability (GA) release.
- 
+
 - Release number: 1.51.1
 - Release date: February 11, 2025
 
@@ -24,9 +29,9 @@ Azure Data Studio 1.51.1 is the latest general availability (GA) release.
 For details about ADS retirement, visit [aka.ms/ads-retirement](https://aka.ms/ads-retirement).
 
 ## January 2025
- 
+
 Azure Data Studio 1.51.0 is the latest general availability (GA) release.
- 
+
 - Release number: 1.51.0
 - Release date: January 29, 2025
 
@@ -37,16 +42,16 @@ Azure Data Studio 1.51.0 is the latest general availability (GA) release.
 * Addressed minor accessibility bugs.
 
 ## November 2024
- 
+
 Azure Data Studio 1.50.0 is the latest general availability (GA) release.
- 
+
 - Release number: 1.50.0
 - Release date: November 20, 2024
 
 ### What's new in 1.50.0
 * Upgraded to Electron v30.5.1 to incorporate upstream fixes
 * SQL Database Projects extension: updated to 1.4.4 to include the latest version of DacFx
-* Query editor: fixed compatibility issue with DESC keyword and snippets 
+* Query editor: fixed compatibility issue with DESC keyword and snippets
 
 ## August 2024 (hotfix)
 
@@ -89,7 +94,7 @@ Azure Data Studio 1.48.0 is the latest general availability (GA) release.
 
 - Release number: 1.48.0
 - Release date: February 28, 2024
- 
+
  ### What's new in 1.48.0
 
 | New Item | Details |
@@ -159,7 +164,7 @@ Azure Data Studio 1.47.0 is the latest general availability (GA) release.
 
 - Release number: 1.47.0
 - Release date: November 8, 2023
- 
+
  ### What's new in 1.47.0
 
 | New Item | Details |
@@ -226,7 +231,7 @@ For details about the issue addressed in the September 2023 hotfix release, visi
 
 For a list of the current known issues, visit the [issues list on GitHub](https://github.com/microsoft/azuredatastudio/issues?q=is%3Aissue).
 
-## September 2023 
+## September 2023
 
 Azure Data Studio 1.46.0 is the latest general availability (GA) release.
 

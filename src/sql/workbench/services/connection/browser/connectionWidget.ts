@@ -88,7 +88,7 @@ export class ConnectionWidget extends lifecycle.Disposable {
 	protected _customOptionWidgets: AdsWidget[];
 	protected _advancedButton: Button;
 	private static readonly _authTypes: AuthenticationType[] =
-		[AuthenticationType.AzureMFA, AuthenticationType.AzureMFAAndUser, AuthenticationType.Integrated, AuthenticationType.SqlLogin, AuthenticationType.DSTSAuth, AuthenticationType.None];
+		[AuthenticationType.AzureMFA, AuthenticationType.AzureMFAAndUser, AuthenticationType.ActiveDirectoryDefault, AuthenticationType.Integrated, AuthenticationType.SqlLogin, AuthenticationType.DSTSAuth, AuthenticationType.None];
 	private static readonly _osByName = {
 		Windows: OperatingSystem.Windows,
 		Macintosh: OperatingSystem.Macintosh,
@@ -254,7 +254,8 @@ export class ConnectionWidget extends lifecycle.Disposable {
 		}
 		const userNameOption: azdata.ConnectionOption = this._optionsMaps[ConnectionOptionSpecialType.userName];
 		this._serverNameInputBox.required = !this.useConnectionString;
-		this._userNameInputBox.required = (!this.useConnectionString) && userNameOption?.isRequired;
+		const currentAuthType = this._authTypeSelectBox ? this.getMatchingAuthType(this._authTypeSelectBox.value) : undefined;
+		this._userNameInputBox.required = (!this.useConnectionString) && !!userNameOption?.isRequired && currentAuthType === AuthenticationType.SqlLogin;
 		this._userNameInputBox.value = '';
 		if (this.useConnectionString) {
 			this._tableContainer.classList.add('hide-customOptions');
@@ -622,8 +623,8 @@ export class ConnectionWidget extends lifecycle.Disposable {
 		if (this.useConnectionString) {
 			shouldEnableConnectButton = this._connectionStringInputBox.isInputValid();
 		} else {
-			const showUsername: boolean = this.authType && (this.authType === AuthenticationType.SqlLogin || this.authType === AuthenticationType.AzureMFAAndUser);
-			shouldEnableConnectButton = showUsername ? (this._serverNameInputBox.isInputValid() && this._userNameInputBox.isInputValid()) : this._serverNameInputBox.isInputValid();
+			const requireUsername: boolean = this.authType && (this.authType === AuthenticationType.SqlLogin || this.authType === AuthenticationType.AzureMFAAndUser);
+			shouldEnableConnectButton = requireUsername ? (this._serverNameInputBox.isInputValid() && this._userNameInputBox.isInputValid()) : this._serverNameInputBox.isInputValid();
 		}
 		this._callbacks.onSetConnectButton(shouldEnableConnectButton);
 	}
@@ -644,6 +645,9 @@ export class ConnectionWidget extends lifecycle.Disposable {
 		this._tableContainer.classList.add('hide-username');
 		this._tableContainer.classList.add('hide-password');
 		this._tableContainer.classList.add('hide-azure-accounts');
+		const userNameOption: azdata.ConnectionOption = this._optionsMaps[ConnectionOptionSpecialType.userName];
+		this._userNameInputBox.required = !!userNameOption?.isRequired && currentAuthType === AuthenticationType.SqlLogin;
+		this._userNameInputBox.setPlaceHolder(userNameOption?.placeholder ?? '');
 
 		if (currentAuthType === AuthenticationType.AzureMFA) {
 			this.fillInAzureAccountOptions().then(async () => {
@@ -683,6 +687,10 @@ export class ConnectionWidget extends lifecycle.Disposable {
 					});
 				}
 			});
+		} else if (currentAuthType === AuthenticationType.ActiveDirectoryDefault) {
+			this._tableContainer.classList.remove('hide-username');
+			this._userNameInputBox.enable();
+			this._userNameInputBox.setPlaceHolder(localize('connectionWidget.entraDefaultUserPlaceholder', "Email or user (optional)"));
 		} else if (currentAuthType === AuthenticationType.SqlLogin) {
 			this._tableContainer.classList.remove('hide-username');
 			this._tableContainer.classList.remove('hide-password');
@@ -940,7 +948,7 @@ export class ConnectionWidget extends lifecycle.Disposable {
 				});
 			}
 
-			if (this.authType === AuthenticationType.AzureMFA || this.authType === AuthenticationType.AzureMFAAndUser || connectionInfo.azureAccount !== null) {
+			if (this.authType === AuthenticationType.AzureMFA || this.authType === AuthenticationType.AzureMFAAndUser) {
 				this.fillInAzureAccountOptions().then(async () => {
 					let accountName = ((this.authType === AuthenticationType.AzureMFA) || connectionInfo.azureAccount !== null)
 						? connectionInfo.azureAccount : connectionInfo.userName;
@@ -1079,7 +1087,7 @@ export class ConnectionWidget extends lifecycle.Disposable {
 			this._userNameInputBox.enable();
 			this._passwordInputBox.enable();
 			this._rememberPasswordCheckBox.enabled = true;
-		} else if (currentAuthType === AuthenticationType.AzureMFAAndUser) {
+		} else if (currentAuthType === AuthenticationType.AzureMFAAndUser || currentAuthType === AuthenticationType.ActiveDirectoryDefault) {
 			this._userNameInputBox.enable();
 		}
 
@@ -1230,12 +1238,18 @@ export class ConnectionWidget extends lifecycle.Disposable {
 				model.userName = this.userName;
 				model.password = this.password;
 				model.authenticationType = this.authenticationType;
-				const azureAccount = this.authToken;
-				if (azureAccount) {
-					// set the azureAccount only if one has been selected, otherwise preserve the initial model value
-					model.azureAccount = azureAccount;
+				if (this.authenticationType === AuthenticationType.ActiveDirectoryDefault) {
+					model.password = '';
+					model.savePassword = false;
+					model.azureAccount = undefined;
+				} else {
+					const azureAccount = this.authToken;
+					if (azureAccount) {
+						// set the azureAccount only if one has been selected, otherwise preserve the initial model value
+						model.azureAccount = azureAccount;
+					}
+					model.savePassword = this._rememberPasswordCheckBox.checked;
 				}
-				model.savePassword = this._rememberPasswordCheckBox.checked;
 				model.databaseName = this.databaseName;
 				if (this._customOptionWidgets) {
 					this._customOptionWidgets.forEach((widget, i) => {

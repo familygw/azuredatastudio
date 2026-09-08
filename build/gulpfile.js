@@ -44,9 +44,22 @@ gulp.task(task.define('watch', task.parallel(/* monacoTypecheckWatchTask, */ wat
 gulp.task('default', _compileTask);
 
 process.on('unhandledRejection', (reason, p) => {
-	console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+	console.error('Unhandled Rejection at: Promise', p, 'reason:', reason);
+	if (reason && reason.stack) {
+		console.error(reason.stack);
+	}
 	process.exit(1);
 });
+
+process.on('beforeExit', (code) => {
+	console.error('beforeExit', code, 'handles', process._getActiveHandles?.()?.length, 'requests', process._getActiveRequests?.()?.length);
+});
+const _exit = process.exit;
+process.exit = function (code) {
+	console.error('process.exit', code);
+	console.error(new Error('exit stack').stack);
+	return _exit.call(process, code);
+};
 
 // Load all the gulpfiles only if running tasks other than the editor tasks
 require('glob').sync('gulpfile.*.js', { cwd: __dirname })

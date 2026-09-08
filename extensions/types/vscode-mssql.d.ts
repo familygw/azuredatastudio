@@ -205,6 +205,10 @@ declare module 'vscode-mssql' {
 		 */
 		AzureMFAAndUser = 'AzureMFAAndUser',
 		/**
+		 * Microsoft Entra ID - Default (DefaultAzureCredential)
+		 */
+		ActiveDirectoryDefault = 'ActiveDirectoryDefault',
+		/**
 		 * Datacenter Security Token Service Authentication
 		 */
 		DSTSAuth = 'dstsAuth',

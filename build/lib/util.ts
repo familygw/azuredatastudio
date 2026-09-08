@@ -390,8 +390,26 @@ export function versionStringToNumber(versionStr: string) {
 
 export function streamToPromise(stream: NodeJS.ReadWriteStream): Promise<void> {
 	return new Promise((c, e) => {
-		stream.on('error', err => e(err));
-		stream.on('end', () => c());
+		// Pending promises do not keep the event loop alive. Gulp-cli listens to
+		// `beforeExit` and reports "Did you forget to signal async completion?"
+		// when Electron download finishes from cache before yauzl/vfs I/O is scheduled.
+		const keepAlive = setInterval(() => { }, 1000);
+		let settled = false;
+		const settle = (err?: unknown) => {
+			if (settled) {
+				return;
+			}
+			settled = true;
+			clearInterval(keepAlive);
+			if (err) {
+				e(err);
+			} else {
+				c();
+			}
+		};
+		stream.once('error', settle);
+		stream.once('end', () => settle());
+		stream.once('finish', () => settle());
 	});
 }
 

@@ -120,6 +120,7 @@ CommandsRegistry.registerCommand('azdata.connect',
 		if (args && args.serverName && args.providerName
 			&& (args.authenticationType === AuthenticationType.Integrated
 				|| args.authenticationType === AuthenticationType.AzureMFA
+				|| args.authenticationType === AuthenticationType.ActiveDirectoryDefault
 				|| (args.userName && args.password))) {
 			const profile: azdata.IConnectionProfile = {
 				serverName: args.serverName,
@@ -177,12 +178,13 @@ configurationRegistry.registerConfiguration({
 		},
 		'sql.defaultAuthenticationType': {
 			'type': 'string',
-			'enum': [AuthenticationType.SqlLogin, AuthenticationType.AzureMFA, AuthenticationType.AzureMFAAndUser, AuthenticationType.Integrated],
+			'enum': [AuthenticationType.SqlLogin, AuthenticationType.AzureMFA, AuthenticationType.AzureMFAAndUser, AuthenticationType.ActiveDirectoryDefault, AuthenticationType.Integrated],
 			'description': localize('sql.defaultAuthenticationTypeDescription', "Default authentication type to use when connecting to Azure resources. "),
 			'enumDescriptions': [
 				localize('sql.defaultAuthenticationType.SqlLogin', "Sql Login"),
 				localize('sql.defaultAuthenticationType.AzureMFA', "Microsoft Entra ID - Universal with MFA support"),
 				localize('sql.defaultAuthenticationType.AzureMFAAndUser', "Microsoft Entra ID - Password"),
+				localize('sql.defaultAuthenticationType.ActiveDirectoryDefault', "Microsoft Entra ID - Default"),
 				localize('sql.defaultAuthenticationType.Integrated', "Windows Authentication"),
 			],
 			'default': AuthenticationType.AzureMFA
